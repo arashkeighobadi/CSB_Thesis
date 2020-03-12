@@ -1,5 +1,8 @@
 //We created the configuration that will be used for our Phaser game.
 var config = {
+	//we specify the width and height of the viewable area of our game.
+	width: 800,//500,
+	height: 600,//375,
   
 	/*set the renderer type for our game
 	The two main types are Canvas and WebGL. WebGL is a faster renderer and has better performance, but not all browsers support it. 
@@ -13,12 +16,10 @@ var config = {
 
 	dom: {
         createContainer: true
-    },
-
-	//we specify the width and height of the viewable area of our game.
-	width: 800,
-	height: 600,
-
+	},
+	
+	mode: Phaser.Scale.FIT,
+	autoCenter: Phaser.Scale.CENTER_BOTH,
 
 	//we enabled the arcade physics that is available in Phaser, and we set the gravity to 0.
 	physics: {
