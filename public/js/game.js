@@ -51,6 +51,7 @@ class preloadGame extends Phaser.Scene{
 	preload(){
 		this.load.spritesheet('player1Sprite', 'assets/p1.jpg', { frameWidth: 14, frameHeight: 14 });
 		this.load.spritesheet('player2Sprite', 'assets/p2.jpg', { frameWidth: 14, frameHeight: 14 });
+		this.load.image('finish', 'assets/game/sprites/star_gold.png');
 		// this.load.image('ground', '/assets/platform.png');
 
 		this.load.image("terrain", "assets/game/maps/terrain_atlas512x.png");
@@ -92,6 +93,16 @@ class playGame extends Phaser.Scene{
 		// to handle animation of everything
 		this.animation = new AnimationHandler(this);
 		this.animation.createAnimations();
+
+		//finish target
+		this.finishSprite = this.add.sprite(128, 50, 'finish');
+		// this.finishSprite = this.add.sprite(672, 550, 'finish'); //debugging purpose
+		this.physics.world.enableBody(this.finishSprite);
+		//Note: arrow function => doesn't create its own "this". That's why we can reference 
+		//		this.finishSprite inside of it.
+		this.physics.add.collider(this.players, this.finishSprite,  () => {
+			this.finishSprite.destroy();
+		});
 
 		//making a tilemap
 		let map1 = this.make.tilemap({ key: "map1" }); /* , tileWidth: 40, tileHeight: 30 */
