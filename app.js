@@ -6,6 +6,7 @@ const session = require('express-session');
 const passport = require('passport');
 
 const app = express();
+var siteVisitorNumber = 0;
 
 //+
 //supplied the app to the HTTP server, which will allow express to handle the HTTP requests.
@@ -29,8 +30,8 @@ var star = {
 //+  
 //to keep track of both team’s score
 var scores = {
-blue: 0,
-red: 0
+team1: 0,
+team2: 0
 };
 
 //+
@@ -87,15 +88,23 @@ app.use('/users', require('./routes/users'));
 io.on('connection', 
 	function (socket) {		
 		console.log('a user connected. id: ' + socket.id);
-	  
+
+		//increase the number of people visited the site by one
+		siteVisitorNumber++;
+
 		// create a new player and add it to our players object
 		players[socket.id] = {
 			playerId: socket.id,
-			x: Math.floor(Math.random() * 700) + 50,
-			y: Math.floor(Math.random() * 300) + 50,
+			playerNumber: siteVisitorNumber,
+			// the x value of the middle of the entrance is 672 so +/- 50 makes starting fair
+			x: (siteVisitorNumber % 2 == 0) ? 622 : 722,
+			y: /* Math.floor(Math.random() * 300) + */ 550,
 			xVelocity: 0,
 			yVelocity: 0,
-			team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue'
+			//players with odd number go to team1 and the ones with even numbers go to team2
+			team: (siteVisitorNumber % 2 == 0) ? 'team2' : 'team1'
+
+			// team: (Math.floor(Math.random() * 2) == 0) ? 'team1' : 'team2'
 		};
 
 		// send the players object to the new player (to this particular socket)
@@ -131,44 +140,6 @@ io.on('connection',
 				// console.log('playerID: ' + players[socket.id].playerId + 'socketID: ' + socket.id);
 			}
 		);
-		
-		// // will be triggered when a player collects a point
-		// socket.on('scored', 
-		// 	function (username) {
-		// 		collection.find({}).sort({ highScore: -1}).toArray((error, result) => {
-		// 			if(error) {
-		// 				return response.status(500).send(error);
-		// 			}
-		// 			for(i=0;i<result.length;i++){
-		// 				if(result[i].name === loginInfo.username){
-		// 					socket.emit('loginApproved', loginInfo.username);
-		// 					approved = true;
-		// 				}
-		// 			}
-		// 			if(!approved){
-		// 				socket.emit('loginFailed', loginInfo.username);
-		// 			}
-		// 		});
-		// 	}
-		// );
-
-		//player wanna shoot, send shoot to all clients
-		socket.on('playerShoot', 
-			function (bulletData) {
-				// emit a message to all players about the player that moved
-				io.emit('shoot', bulletData);
-				console.log(bulletData);
-			}
-		);
-
-		socket.on('playerGotShot',
-			function (id){
-				// if(id != socket.id) {
-					io.emit('playerGotShotImpact', players[id].playerId);
-					// console.log('playerGotShotImpact: ' + players[id].playerId + ' socket.id: ' + socket.id);
-				// }
-
-			});
 		
 		socket.on('loginPressed',
 			function (loginInfo){

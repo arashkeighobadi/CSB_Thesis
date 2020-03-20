@@ -5,7 +5,7 @@ const router = express.Router();
 const { ensureAuthenticated } = require('../config/auth'); //we use this to protect dashboard route. 
 
 // Welcome Page
-router.get("/", (req, res) => res.render("welcome")); //renders welcome.ejs
+router.get("/", (req, res) => res.render("dashboard")); //renders welcome.ejs
 
 // Dashboard - renders dashboard.ejs
 // Note: this route is protected by ensureAuthenticated parameter.

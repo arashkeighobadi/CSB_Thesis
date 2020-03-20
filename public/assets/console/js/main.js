@@ -16,6 +16,7 @@
 // })
 
 $(document).ready(function(){
+  $("input").focus()
   $('.header').height($(window).height());
   $('body').width($(window).width());
 })

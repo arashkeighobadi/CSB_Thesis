@@ -1,56 +1,53 @@
-var AnimationHandler = function(that) {
+export class AnimationHandler {
 
+    constructor(that) {
+        this.playGameScene = that;
 
-    this.play = function(key, object){
-        object.anims.play(key, true);
-    };
+        this.play = function(key, object){
+            object.anims.play(key, true);
+        };
+    
+        this.stop = function(key, object){
+            object.anims.play(key, false);
+        };
+    }
 
-    this.stop = function(key, object){
-        object.anims.play(key, false);
-    };
-
-    this.createAnimations = function() {
-        //Creating soldier animations
-        that.anims.create({
+    createAnimations = function() {
+        //Creating player animations
+        this.playGameScene.anims.create({
             key: 'left',
-            frames: that.anims.generateFrameNumbers('soldier', { start: 0, end: 3 }),
+            frames: this.playGameScene.anims.generateFrameNumbers('player', { start: 0, end: 3 }),
             frameRate: 10,
             repeat: -1
         });
         
-        that.anims.create({
+        this.playGameScene.anims.create({
             key: 'leftStatic',
-            frames: [ { key: 'soldier', frame: 0 } ],
+            frames: [ { key: 'player', frame: 0 } ],
             frameRate: 20
         });
 
-        that.anims.create({
+        this.playGameScene.anims.create({
             key: 'turn',
-            frames: [ { key: 'soldier', frame: 4 } ],
+            frames: [ { key: 'player', frame: 4 } ],
             frameRate: 20
         });
 
-        that.anims.create({
+        this.playGameScene.anims.create({
             key: 'right',
-            frames: that.anims.generateFrameNumbers('soldier', { start: 5, end: 8 }),
+            frames: this.playGameScene.anims.generateFrameNumbers('player', { start: 5, end: 8 }),
             frameRate: 10,
             repeat: -1
         });
         
-        that.anims.create({
+        this.playGameScene.anims.create({
             key: 'rightStatic',
-            frames: [ { key: 'soldier', frame: 7 } ],
+            frames: [ { key: 'player', frame: 7 } ],
             frameRate: 20
         });
 
         //Creating bullet animations  (place holder)
         //...
         //...
-
     }
-
-    
-    
-
-
 };

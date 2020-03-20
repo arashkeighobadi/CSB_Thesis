@@ -1,75 +1,67 @@
-var Player = function(that, playerInfo) {
+export class Player {
 
-    this.username = null;
-    this.speed = 100;
-
-    this.movement = that.movement.movingDirections.NONE;
-    this.lookingDirection = that.movement.lookingDirections.NONE;
-
-    this.soldier = that.add.sprite(0, 0/* container/2 - soldier/2 */, 'soldier');//.setOrigin(0.5); //0.5 means middle of the sprite
-    // console.log("soldier sprite dimension: " + this.soldier.width + " " + this.soldier.height);
+    constructor(that, playerInfo) {
+        this.playGameScene = that;
     
-    //Created our player’s soldier by using the x and y coordinates that we generated in our server code.
-	//Instead of just using  self.add.image to create our player’s soldier, we used  
-	//self.physics.add.image in order to allow that game object to use the arcade physics.
-	this.soldierContainer = that.add.container(playerInfo.x, playerInfo.y).setSize(this.soldier.width, this.soldier.height);
-	// self.setOrigin([self.soldierContainer],0,0);
-
-	// this.soldier.enableBody=true;	
-	this.soldierContainer.playerId = playerInfo.playerId;
-	// console.log(self.soldierContainer.width);
+        this.username = null;
+        this.speed = 100;
     
-    //collisions
-	that.physics.world.enable(this.soldierContainer);
-    this.soldierContainer.body.setCollideWorldBounds(true);
-    that.physics.add.collider(this.soldierContainer, that.platforms);
-    // that.physics.add.collider(this.soldierContainer, that.movingPlatform);
-
-    this.soldierContainer.add([this.soldier]);
-
-	//to change the color of the soldier game object, depending on the team that was generated when we created our player info on the server.
-	if (playerInfo.team === 'blue') {
-		// self.soldier.setTint(0x0000ff);
-	} else {
-		this.soldier.setTint(0x00ff00);
-    }
-    
-    this.createAim = function () {
-        //aim pointer
-        this.aim = that.add.image(50, 0, 'aim');
-        /*
-        var aim = self.add.graphics(0,0);
-        aim.fillStyle(0x0000ff, 1);
+        this.movement = that.movement.movingDirections.NONE;
+        this.lookingDirection = that.movement.lookingDirections.NONE;
+        this.bodySprite;
+        this.playerContainer;
         
-        aim = aim.fillTriangle(25, 5, 25, - 5, 35, 0);
-        */
-        this.soldierContainer.add([this.aim]);
+        //to change the color of the bodySprite game object, depending on the team that was generated when we created our player info on the server.
+        if (playerInfo.team === 'team1') {
+            this.bodySprite = that.add.sprite(0, 0/* container/2 - bodySprite/2 */, 'player1Sprite');//.setOrigin(0.5); //0.5 means middle of the sprite
+            // this.bodySprite.setTint(0x0000ff);
+        } 
+        else if (playerInfo.team === 'team2') {
+            this.bodySprite = that.add.sprite(0, 0/* container/2 - bodySprite/2 */, 'player2Sprite');//.setOrigin(0.5); //0.5 means middle of the sprite
+            this.bodySprite.setTint(0x00ff00);
+        }
+        else {
+            console.log("wrong group name! for player ID " + playerInfo.playerId);
+        }
+        // console.log("bodySprite sprite dimension: " + this.bodySprite.width + " " + this.bodySprite.height);
+        
+        //Created our player’s bodySprite by using the x and y coordinates that we generated in our server code.
+        //Instead of just using  self.add.image to create our player’s boySprite, we used  
+        //self.physics.add.image in order to allow that game object to use the arcade physics.
+        this.playerContainer = that.add.container(playerInfo.x, playerInfo.y).setSize(this.bodySprite.width, this.bodySprite.height);
+        
+        // this.bodySprite.enableBody=true;	
+        this.playerContainer.playerId = playerInfo.playerId;
+        
+        //collisions
+        that.physics.world.enable(this.playerContainer);
+        // this.playerContainer.body.setCollideWorldBounds(true);
+        // that.physics.add.collider(this.playerContainer, that.platforms);
+
+        this.playerContainer.add([this.bodySprite]);
+
+        that.players.add(this.playerContainer);
     }
 
-    this.creatScore = function() {
+    creatScore = function() {
         this.score = 0;
-        this.scoreText = that.add.text(584, 16, '', { fontSize: '32px', fill: '#FFFFFF' });
+        this.scoreText = this.playGameScene.add.text(584, 16, '', { fontSize: '32px', fill: '#FFFFFF' });
         this.scoreText.setText(this.score);
     }
 
-    // this.getMovement = function() {
-    //     return this.movement;
-    // }
-
-    this.get_xVelocity = function() {
-        return this.soldierContainer.body.velocity.x;
+    get_xVelocity = function() {
+        return this.playerContainer.body.velocity.x;
     }
 
-    this.get_yVelocity = function() {
-        return this.soldierContainer.body.velocity.y;
+    get_yVelocity = function() {
+        return this.playerContainer.body.velocity.y;
     }
 
-    this.getX = function() {
-        return this.soldierContainer.x;
-    }
-    this.getY = function() {
-        return this.soldierContainer.y;
+    getX = function() {
+        return this.playerContainer.x;
     }
 
-
+    getY = function() {
+        return this.playerContainer.y;
+    }
 };
