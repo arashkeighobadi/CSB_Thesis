@@ -1,5 +1,6 @@
 const LocalStrategy = require('passport-local').Strategy;
 const mongoose = require('mongoose');
+mongoose.set('useUnifiedTopology', true); //in order to get rid of the deprecated error
 const bcrypt = require('bcryptjs');
 // We pass in passport from app.js file so we don't import it here
 

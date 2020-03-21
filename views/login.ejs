@@ -24,8 +24,15 @@
               placeholder="Enter Password"
             />
           </div>
-          <button type="submit" class="btn btn-primary btn-block">Login</button>
+          <button type="submit" class="btn btn-primary btn-block" id="login">Login</button>
         </form>
+        <script>
+          document.getElementById("login").addEventListener("click", saveEmail);
+          
+          function saveEmail() {
+            sessionStorage.setItem('email', document.getElementById("email").value );
+          }
+          </script>
         <p class="lead mt-4">
           No Account? <a href="/users/register">Register</a>
         </p>

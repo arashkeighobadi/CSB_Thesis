@@ -81,7 +81,8 @@ router.post('/register', (req, res) => {
                                     res.redirect('/users/login');
                                 })
                                 .catch(err => console.log(err));
-                        }))
+                        })
+                    );
                 }
             });
             

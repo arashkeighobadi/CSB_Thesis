@@ -7,7 +7,8 @@ const UserSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -17,6 +18,10 @@ const UserSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    wins: {
+        type: Number,
+        default: 0
+    }
 });
 
 // we create a model from our schema and assign it to the User variable
