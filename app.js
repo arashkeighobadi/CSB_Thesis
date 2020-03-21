@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const flash = require('connect-flash');
 const session = require('express-session');
 const passport = require('passport');
+const User = require('./models/User');
 
 const app = express();
 var siteVisitorNumber = 0;
@@ -19,6 +20,10 @@ var io = require('socket.io').listen(server);
 //+
 //to keep track of all the players that are currently in the game.
 var players = {};
+
+//confidential list of all players where we store emails and ID's
+//!!! DO NOT SEND IT TO THE CLIENTS !!!
+var confidentialPlayers = {};
 
 //+
 //to store the position of our star collectible
@@ -49,6 +54,38 @@ const db = require('./config/keys').MongoURI;
 mongoose.connect(db, { useNewUrlParser: true}) //returns a promise so we handle it in the following.
     .then(() => console.log('MongoDB Connected...'))
     .catch(err => console.log(err));
+
+//this could be gone in User.js and be part of a class
+function getUsers(query={}, project={}, limit=10) {
+	// userss = ['hi'];
+	return User.find(query, project).limit(limit).exec();
+	// .then( users => {
+	// 	users.forEach((user) => {
+	// 		while(!user.name){};
+	// 		console.log(user);
+	// 		userss.push(user);
+	// 		console.log("pushed " + userss);
+
+	// 	})
+	// }).catch( err => {
+	// 	throw err;
+	// });
+}
+
+// userss = ['hi'];
+// getUsers({name: 'test5'}).then( users => {
+// 	users.forEach((user) => {
+// 		while(!user.name){};
+// 		console.log(user);
+// 		userss.push(user);
+// 		console.log("pushed " + userss);
+
+// 	})
+// 	console.log("hello " + userss );
+// }).catch( err => {
+// 	throw err;
+// });
+
 
 // EJS - note: use() comes before set()
 app.use(expressLayouts); // using this middleware
@@ -108,17 +145,27 @@ io.on('connection',
 		};
 
 		socket.on("playerEmail", function (playerEmail) {
-			players[socket.id].playerEmail = playerEmail;
-			console.log("email : " + players[socket.id].playerEmail);
-			// send the players object to the new player (to this particular socket)
-			socket.emit('currentPlayers', players);
-			// send the star object to the new player
-			socket.emit('starLocation', star);
-			// send the current scores
-			socket.emit('scoreUpdate', scores);
-			
-			// update all other players about the new player (to all other sockets)
-			socket.broadcast.emit('newPlayer', players[socket.id]);
+			// players[socket.id].playerEmail = playerEmail;
+			// console.log("email : " + players[socket.id].playerEmail);
+			confidentialPlayers[socket.id] = {playerEmail: playerEmail};
+			//accessing DB and getting the name of the player who just got connected, using their email
+			getUsers({ email: playerEmail}).then( users => {
+				users.forEach(user => {
+					players[socket.id].name = user.name;
+				});
+				//the following call are inside then because they need to wait for the 
+				//query result and then be executed
+				// send the players object to the new player (to this particular socket)
+				socket.emit('currentPlayers', players);
+				// send the star object to the new player
+				socket.emit('starLocation', star);
+				// send the current scores
+				socket.emit('scoreUpdate', scores);
+				// update all other players about the new player (to all other sockets)
+				socket.broadcast.emit('newPlayer', players[socket.id]);
+			}).catch (err => {
+				throw err;
+			});
 		});
 
 	  

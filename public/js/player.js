@@ -4,6 +4,7 @@ export class Player {
         this.playGameScene = that;
     
         this.username = playerInfo.playerEmail;
+        this.name = playerInfo.name;
         this.speed = 100;
     
         this.movement = that.movement.movingDirections.NONE;

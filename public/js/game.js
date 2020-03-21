@@ -118,7 +118,7 @@ class playGame extends Phaser.Scene{
 				this.messageBox.addButton("OK");
 			} else {
 				// console.log(this.playersList[id].username + " won!");
-				let txt = this.playersList[id].username + " won!";
+				let txt = this.playersList[id].name + " won!";
 				this.messageBox = new MessageBox(this, txt);
 				this.messageBox.addButton("OK");
 			}
@@ -237,7 +237,6 @@ class playGame extends Phaser.Scene{
 	
 	/*==============  Sub-Functions  ==============*/
 	addPlayer(self, playerInfo) {
-		console.log("email : " + playerInfo.playerEmail);
 		self.player1 = new Player(self, playerInfo);
 		// self.player1.createAim();
 		self.player1.creatScore();
