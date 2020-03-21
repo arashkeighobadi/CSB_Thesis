@@ -2,15 +2,21 @@ export class Player {
 
     constructor(that, playerInfo) {
         this.playGameScene = that;
-    
         this.username = playerInfo.playerEmail;
         this.name = playerInfo.name;
         this.speed = 100;
-    
+        
         this.movement = that.movement.movingDirections.NONE;
         this.lookingDirection = that.movement.lookingDirections.NONE;
         this.bodySprite;
         this.playerContainer;
+        
+        //Score
+        this.score = playerInfo.score;
+        if (this.playGameScene.socket.id == playerInfo.playerId){
+            this.scoreText = this.playGameScene.add.text(584, 16, '', { fontSize: '32px', fill: '#FFFFFF' });
+            this.scoreText.setText('wins: ' + this.score);
+        }
         
         //to change the color of the bodySprite game object, depending on the team that was generated when we created our player info on the server.
         if (playerInfo.team === 'team1') {
@@ -44,10 +50,14 @@ export class Player {
         that.players.add(this.playerContainer);
     }
 
-    creatScore = function() {
-        this.score = 0;
-        this.scoreText = this.playGameScene.add.text(584, 16, '', { fontSize: '32px', fill: '#FFFFFF' });
-        this.scoreText.setText(this.score);
+    scoreUp() {
+        this.playGameScene.socket.emit('scored', this.playerContainer.playerId);
+        this.playGameScene.socket.on('scored', score => {
+            //increase score
+            console.log("I fucking scoreddddd!!!!");
+            this.score = score;
+            this.scoreText.setText('wins: ' + score);
+        });
     }
 
     get_xVelocity = function() {

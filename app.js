@@ -53,7 +53,12 @@ const db = require('./config/keys').MongoURI;
 // Connect to Mongo
 mongoose.connect(db, { useNewUrlParser: true}) //returns a promise so we handle it in the following.
     .then(() => console.log('MongoDB Connected...'))
-    .catch(err => console.log(err));
+	.catch(err => console.log(err));
+
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
 
 //this could be gone in User.js and be part of a class
 function getUsers(query={}, project={}, limit=10) {
@@ -152,6 +157,8 @@ io.on('connection',
 			getUsers({ email: playerEmail}).then( users => {
 				users.forEach(user => {
 					players[socket.id].name = user.name;
+					players[socket.id].score = user.wins;
+					console.log("score : " + user.wins);
 				});
 				//the following call are inside then because they need to wait for the 
 				//query result and then be executed
@@ -214,6 +221,24 @@ io.on('connection',
 				});
 			}
 		);
+
+		socket.on('scored', id => {
+			console.log('scoreeeed! ' + id);
+			let email = confidentialPlayers[id].playerEmail;
+			User.findOneAndUpdate({email: email}, {$inc : {'wins' : 1}})
+			//immediately querying the field that we updated and sending the result to the client
+			//to make sure they will get the up to date result
+			.then( () => {
+				getUsers({email: email}).then( users => {
+					socket.emit('scored', users[0].wins );
+					console.log("wins : " + users[0].wins);
+				}).catch(err => {
+					throw err;
+				});
+			}).catch(err => {
+				throw err;
+			});
+		});
 				
 	}
 );

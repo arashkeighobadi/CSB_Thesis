@@ -113,6 +113,7 @@ class playGame extends Phaser.Scene{
 			// console.log(player);
 			let id = playerContainer.playerId;
 			if (this.player1.playerContainer.playerId == id){
+				this.player1.scoreUp();
 				console.log("You won!");
 				this.messageBox = new MessageBox(this, "You Won!");
 				this.messageBox.addButton("OK");
@@ -165,7 +166,7 @@ class playGame extends Phaser.Scene{
 					function (id) {
 						if (players[id].playerId === self.socket.id) {
 							//passes it the current player’s information, and a reference to the current scene.
-							self.addPlayer(self, players[id]);
+							self.player1 = new Player(self, players[id]);
 						} else {//if players[id] is not the current player.
 							self.addOtherPlayers(self, players[id]);
 						}
@@ -229,30 +230,7 @@ class playGame extends Phaser.Scene{
 	
 	}
 	
-	scoreUp(self) {
-		self.player1.score++;
-		self.player1.scoreText.setText(self.player1.score);
-		self.socket.emit("scored", self.player1.username);
-	}
-	
-	/*==============  Sub-Functions  ==============*/
-	addPlayer(self, playerInfo) {
-		self.player1 = new Player(self, playerInfo);
-		// self.player1.createAim();
-		self.player1.creatScore();
-		
-		/*
-		to modify how the game object reacts to the arcade physics. 
-		Both  setDrag and  setAngularDrag are used to control the amount of resistance the object will face when it is moving.  
-		setMaxVelocity is used to control the max speed the game object can reach.
-		*/
-		/*
-		soldier.setDrag(100);
-		soldier.setAngularDrag(100);
-		soldier.setMaxVelocity(200);
-		*/
-	}
-	
+	/*==============  Sub-Functions  ==============*/			
 	addOtherPlayers = function(self, playerInfo) {
 		
 		const otherPlayer = new Player(self, playerInfo);
