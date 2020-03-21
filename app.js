@@ -107,15 +107,20 @@ io.on('connection',
 			// team: (Math.floor(Math.random() * 2) == 0) ? 'team1' : 'team2'
 		};
 
-		// send the players object to the new player (to this particular socket)
-		socket.emit('currentPlayers', players);
-		// send the star object to the new player
-		socket.emit('starLocation', star);
-		// send the current scores
-		socket.emit('scoreUpdate', scores);
-		
-		// update all other players about the new player (to all other sockets)
-		socket.broadcast.emit('newPlayer', players[socket.id]);
+		socket.on("playerEmail", function (playerEmail) {
+			players[socket.id].playerEmail = playerEmail;
+			console.log("email : " + players[socket.id].playerEmail);
+			// send the players object to the new player (to this particular socket)
+			socket.emit('currentPlayers', players);
+			// send the star object to the new player
+			socket.emit('starLocation', star);
+			// send the current scores
+			socket.emit('scoreUpdate', scores);
+			
+			// update all other players about the new player (to all other sockets)
+			socket.broadcast.emit('newPlayer', players[socket.id]);
+		});
+
 	  
 		socket.on('disconnect', 
 			function () {

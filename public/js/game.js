@@ -66,8 +66,17 @@ class preloadGame extends Phaser.Scene{
 class playGame extends Phaser.Scene{
 	constructor(){
 		super("PlayGame");
+		this.playersList = {};
 	}
 	create() {
+		
+		this.socket = io().on('connect', () => {
+			this.socket.emit('playerEmail', sessionStorage.getItem('email'));
+		});
+		// this.playerEmail = 
+		//sending the email of the logged in user in order to have 
+		//it mapped to the player stored on the server side.
+		// this.socket.emit("playerEmail", this.playerEmail);
 		
 		// to handle movement of everything which may move
 		this.movement = new MovementHandler(this);
@@ -76,7 +85,7 @@ class playGame extends Phaser.Scene{
 		this.players = this.add.group();
 		this.physics.world.enableBody(this.players);
 
-		this.otherPlayers = this.add.group();
+		// this.otherPlayers = this.add.group();
 		
 		//action listener for collision with the world bounds
 		// this.physics.world.on('worldbounds', onWorldBounds);
@@ -100,7 +109,19 @@ class playGame extends Phaser.Scene{
 		this.physics.world.enableBody(this.finishSprite);
 		//Note: arrow function => doesn't create its own "this". That's why we can reference 
 		//		this.finishSprite inside of it.
-		this.physics.add.collider(this.players, this.finishSprite,  () => {
+		this.physics.add.collider(this.players, this.finishSprite,  (playerContainer, finishSprite) => {
+			// console.log(player);
+			let id = playerContainer.playerId;
+			if (this.player1.playerContainer.playerId == id){
+				console.log("You won!");
+				this.messageBox = new MessageBox(this, "You Won!");
+				this.messageBox.addButton("OK");
+			} else {
+				// console.log(this.playersList[id].username + " won!");
+				let txt = this.playersList[id].username + " won!";
+				this.messageBox = new MessageBox(this, txt);
+				this.messageBox.addButton("OK");
+			}
 			this.finishSprite.destroy();
 		});
 
@@ -121,6 +142,9 @@ class playGame extends Phaser.Scene{
 		this.physics.add.collider(this.players, boundaryLayer);
 			//collision by tile property
 		boundaryLayer.setCollisionByProperty({collides: true});
+
+		// Message box for communicating with the user
+		this.messageBox = null;
 	}
 
 	update() {
@@ -132,7 +156,6 @@ class playGame extends Phaser.Scene{
 	
 	/*===============================   Functions used in create()	===============================*/
 	listenToServer = function (self){
-		self.socket = io();
 		//listens for the currentPlayers event
 		self.socket.on('currentPlayers', 
 			function (players) {
@@ -162,11 +185,11 @@ class playGame extends Phaser.Scene{
 		self.socket.on('disconnect', 
 			function (playerId) {
 				//The  getChildren() method will return an array of all the game objects that are in othePlayers group
-				self.otherPlayers.getChildren().forEach(
-					function(otherPlayer) {
-						if (playerId === otherPlayer.playerId) {
+				self.players.getChildren().forEach(
+					function(player) {
+						if (playerId === player.playerId) {
 							//to remove that game object from the game
-							otherPlayer.destroy();
+							player.destroy();
 						}
 					}
 				);
@@ -184,11 +207,11 @@ class playGame extends Phaser.Scene{
 		
 		//when playerMoved event is emitted, we will need to update that player’s sprite in the game
 		self.socket.on('playerMoved', function (playerInfo) {
-		  self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+		  self.players.getChildren().forEach(function (player) {
 			  
-			if (playerInfo.playerId === otherPlayer.playerId) {
+			if (playerInfo.playerId === player.playerId && playerInfo.playerId != self.player1.playerId) {
 				//Set the position
-				otherPlayer.setPosition(playerInfo.x, playerInfo.y ); //hacky way of synchronizing Y location
+				player.setPosition(playerInfo.x, playerInfo.y ); //hacky way of synchronizing Y location
 				//Setting velocity info for generating animation:
 				//NOTE: 
 				//At the moment I'm handling otherPlayers animation by sending the velocity info
@@ -198,8 +221,8 @@ class playGame extends Phaser.Scene{
 				//There seem to be some delay in the animation. Perhaps it's better to handle
 				//animation of otherPlayers based on change of location of their sprite in the client side
 				//and not to send velocity info over the network
-				otherPlayer.xVelocity = playerInfo.xVelocity;
-				otherPlayer.yVelocity = playerInfo.yVelocity;
+				player.xVelocity = playerInfo.xVelocity;
+				player.yVelocity = playerInfo.yVelocity;
 			}
 		  });
 		});
@@ -214,7 +237,7 @@ class playGame extends Phaser.Scene{
 	
 	/*==============  Sub-Functions  ==============*/
 	addPlayer(self, playerInfo) {
-		
+		console.log("email : " + playerInfo.playerEmail);
 		self.player1 = new Player(self, playerInfo);
 		// self.player1.createAim();
 		self.player1.creatScore();
@@ -235,7 +258,9 @@ class playGame extends Phaser.Scene{
 		
 		const otherPlayer = new Player(self, playerInfo);
 		otherPlayer.playerContainer.body.setAllowGravity(false);
-		self.otherPlayers.add(otherPlayer.playerContainer);
+		self.playersList[playerInfo.playerId] = otherPlayer;
+		// self.otherPlayers.add(otherPlayer.playerContainer);
+		// self.players.add(otherPlayer.playerContainer);
 	}
 	
 	/*===============================   Functions used in update()	===============================*/
@@ -302,5 +327,6 @@ class playGame extends Phaser.Scene{
 import { MovementHandler } from "./movementHandler.js";
 import { Player } from "./player.js";
 import { AnimationHandler } from "./animationHandler.js";
- 
+import { MessageBox } from "./messageBox.js";
+
 

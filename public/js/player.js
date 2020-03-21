@@ -3,7 +3,7 @@ export class Player {
     constructor(that, playerInfo) {
         this.playGameScene = that;
     
-        this.username = null;
+        this.username = playerInfo.playerEmail;
         this.speed = 100;
     
         this.movement = that.movement.movingDirections.NONE;
