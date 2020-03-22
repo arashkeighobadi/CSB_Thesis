@@ -35,16 +35,12 @@ export class MessageBox {
         // this.msgBox = msgBox;
     }
 
-    addButton(buttonText) {
+    addButton(buttonText, buttonLogic) {
         //make the close button
         // this.button = this.gameScene.add.button(0, 0, buttonText);
         this.button = this.gameScene.add.text(400, 300, buttonText, { fontSize: '32px', fill: '#0f0' });
         this.button.setInteractive();
-        this.button.on('pointerdown', () => {
-            this.hideBox();
-            console.log("clicked");
-        
-        });
+        this.button.on('pointerdown', buttonLogic);
     
 
         //add the button to the group
