@@ -57,7 +57,7 @@ module.exports = class Net {
         this.io.on('connection', 
             function (socket) {		
                 console.log('a user connected. id: ' + socket.id);
-                    
+
                 //increase the number of people visited the site by one
                 that.siteVisitorNumber++;
 
@@ -68,12 +68,13 @@ module.exports = class Net {
                     playerId: socket.id,
                     playerNumber: that.siteVisitorNumber,
                     // the x value of the middle of the entrance is 672 so +/- 50 makes starting fair
-                    x: (that.siteVisitorNumber % 2 == 0) ? 622 : 722,
+                    // x will be determined when they find a match
+                    x: null/* (that.siteVisitorNumber % 2 == 0) ? 622 : 722 */,
                     y: /* Math.floor(Math.random() * 300) + */ 550,
                     xVelocity: 0,
                     yVelocity: 0,
-                    //players with odd number go to team1 and the ones with even numbers go to team2
-                    team: (that.siteVisitorNumber % 2 == 1) ? 'team1' : 'team2'
+                    // team will be determined when they find a match
+                    team: null /* (that.siteVisitorNumber % 2 == 1) ? 'team1' : 'team2' */
                 };
     
                 if(that.siteVisitorNumber % 2 == 1){
@@ -161,6 +162,11 @@ module.exports = class Net {
             let opponent = this.waiting.pop();
             let searcher = this.waiting.shift();
             let players = {searcher, opponent};
+
+            searcher.team = "team1";
+            searcher.x = 622;
+            opponent.team = "team2";
+            opponent.x = 722;
 
             opponent.opponentId = searcher.playerId;
             searcher.opponentId = opponent.playerId;
