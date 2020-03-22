@@ -66,8 +66,12 @@ class preloadGame extends Phaser.Scene{
 class playGame extends Phaser.Scene{
 	constructor(){
 		super("PlayGame");
-		// this.playersList = {};
+		this.socket = null;
 		this.opponent = null;
+		this.messageBox = null;
+		this.movement = null;
+		this.pause = false;
+
 	}
 	create() {
 		this.socket = io().on('connect', () => {
@@ -79,7 +83,10 @@ class playGame extends Phaser.Scene{
 				this.socket.emit('searching', sessionStorage.getItem('email'));
 				this.socket.on('matched', players => {
 					console.log("found match" );					
-					this.loadGame(players)
+					this.loadGame(players);
+					if(this.pause){
+						this.pause = false;
+					}
 				});
 
 				// this.messageBox.hideBox();
@@ -127,16 +134,20 @@ class playGame extends Phaser.Scene{
 				this.player1.scoreUp();
 				console.log("You won!");
 				this.messageBox = new MessageBox(this, "You Won!");
-				this.messageBox.addButton("OK", () => {
+				this.messageBox.addButton("PLAY AGAIN", () => {
+					this.pause = true;
 					this.messageBox.hideBox();
+					this.scene.restart();
 					console.log("clicked");
 				});
 			} else {
 				// console.log(this.playersList[id].username + " won!");
 				let txt = this.opponent.name + " won!";
 				this.messageBox = new MessageBox(this, txt);
-				this.messageBox.addButton("OK", () => {
+				this.messageBox.addButton("PLAY AGAIN", () => {
+					this.pause = true;
 					this.messageBox.hideBox();
+					this.scene.restart();
 					console.log("clicked");
 				});
 			}
@@ -219,25 +230,6 @@ class playGame extends Phaser.Scene{
 			player.playerContainer.setPosition(playerInfo.x, playerInfo.y ); //hacky way of synchronizing Y location
 			player.xVelocity = playerInfo.xVelocity;
 			player.yVelocity = playerInfo.yVelocity;
-			
-		//   self.players.getChildren().forEach(function (player) {
-			  
-		// 	if (playerInfo.playerId === player.playerId && playerInfo.playerId != self.player1.playerId) {
-		// 		//Set the position
-		// 		player.setPosition(playerInfo.x, playerInfo.y ); //hacky way of synchronizing Y location
-		// 		//Setting velocity info for generating animation:
-		// 		//NOTE: 
-		// 		//At the moment I'm handling otherPlayers animation by sending the velocity info
-		// 		//over the network and depending on xVelocity's sign I'm handling the animation in the update
-		// 		//function
-		// 		//IMPROVEMENT OPPORTUNITY:
-		// 		//There seem to be some delay in the animation. Perhaps it's better to handle
-		// 		//animation of otherPlayers based on change of location of their sprite in the client side
-		// 		//and not to send velocity info over the network
-		// 		player.xVelocity = playerInfo.xVelocity;
-		// 		player.yVelocity = playerInfo.yVelocity;
-		// 	}
-		//   });
 		});
 	
 	}
@@ -254,7 +246,9 @@ class playGame extends Phaser.Scene{
 	
 	/*===============================   Functions used in update()	===============================*/
 	handleMoveEvent(self){
-	
+		if(self.pause){
+			return;
+		}
 		//The angular velocity will allow the soldier to rotate left and right.
 		if (self.cursors.left.isDown) {
 			self.movement.move('left', self.player1);
@@ -292,6 +286,7 @@ class playGame extends Phaser.Scene{
 	}
 	
 	emitMovement(self){
+
 		//three new variables. We use them to store information about the player.
 		let x = self.player1.getX();
 		let y = self.player1.getY();

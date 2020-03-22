@@ -57,7 +57,7 @@ module.exports = class Net {
         this.io.on('connection', 
             function (socket) {		
                 console.log('a user connected. id: ' + socket.id);
-                
+                    
                 //increase the number of people visited the site by one
                 that.siteVisitorNumber++;
 
