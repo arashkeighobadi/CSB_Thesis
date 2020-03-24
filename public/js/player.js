@@ -42,7 +42,7 @@ export class Player {
         
         //collisions
         that.physics.world.enable(this.playerContainer);
-        // this.playerContainer.body.setCollideWorldBounds(true);
+        this.playerContainer.body.setCollideWorldBounds(true);
         // that.physics.add.collider(this.playerContainer, that.platforms);
 
         this.playerContainer.add([this.bodySprite]);

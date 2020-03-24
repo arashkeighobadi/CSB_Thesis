@@ -17,37 +17,11 @@ module.exports = class Net {
         this.groups = {};
 
         this.siteVisitorNumber = 0;
-
-
-    }
-
-    incomingHandler(msg, obj) {
-
     }
 
     //the message to be sent, the object to be sent, the socket id of the target
     outgoingHandler(msg, obj, playerID) {
-        // console.log('sockets : ' + this.io.sockets[playerID] + " " + playerID);
-        // console.log('sockets : ' + typeof(this.io.sockets));
-        // socket.broadcast.to(playerID).emit(msg, obj);
-        // this.io.sockets[playerID].emit(msg, obj);
-        // socket.emit(msg, obj).to(playerID);
-        // this.io.emit(msg, obj).to(playerID);
         this.io.to(`${playerID}`).emit(msg, obj);
-
-    }
-    
-    //the message to be sent, the object to be sent, the group id of the targets
-    outgoingGroupHandler(msg, obj, groupID) {
-        console.log("group id : " + groupID);
-
-        let id1 = this.groups[groupID].firstPlayer.playerID;
-        this.outgoingHandler(msg, obj, id1);
-        let id2;
-        if(this.groups[groupID].secondPlayer){
-            id2 = this.groups[groupID].secondPlayer.playerID;
-            this.outgoingHandler(msg, obj, id2);
-        }
     }
 
     //this is called from app.js
