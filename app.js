@@ -6,6 +6,7 @@ class Application {
         const flash = require('connect-flash');
         const session = require('express-session');
         const passport = require('passport');
+        
         const Net = require('./net.js');
         
         const app = express();

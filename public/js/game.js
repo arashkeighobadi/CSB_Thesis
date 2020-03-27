@@ -33,18 +33,13 @@ window.onload = function() {
 		},
 	
 		//we embedded a scene object which will use the  preload, update, and  create functions we defined.
-		scene: [preloadGame, playGame]
-		// {
-		// 	preload: preload,
-		// 	create: create,
-		// 	update: update
-		// }
+		scene: [PreloadGame, PlayGame]
 	};
 	//we passed our config object to Phaser when we created the new game instance.
 	game = new Phaser.Game(config);
 }
 
-class preloadGame extends Phaser.Scene{
+class PreloadGame extends Phaser.Scene{
 	constructor(){
 		super("PreloadGame");
 	}
@@ -63,14 +58,20 @@ class preloadGame extends Phaser.Scene{
 	}
 }
 
-class playGame extends Phaser.Scene{
+class PlayGame extends Phaser.Scene{
 	constructor(){
 		super("PlayGame");
 		this.clientNet = new ClientNet(this);
 		this.socket = null;
+		this.player1 = null;
 		this.opponent = null;
 		this.messageBox = null;
-		this.movement = null;
+		// to handle movement of everything which may move
+		this.movement = new MovementHandler(this);
+		// to handle collision of everything
+		this.collisionHandler = new CollisionHandler(this);
+		// to handle animation of everything
+		this.animation = new AnimationHandler(this);
 		this.pause = false;
 
 
@@ -85,6 +86,8 @@ class playGame extends Phaser.Scene{
 			//if the user clicks on yes, the callback function is fired
 			this.messageBox.addButton("YES", () => {
 				this.messageBox.text1.setText("Searching...");
+				//make the yes button disabled. Otherwise it can be pressed again.
+				this.input.disable(this.messageBox.button);
 				/* 	
 					-client net sends a req to server to find a match.
 					-server sends back player objects once found a match.
@@ -119,16 +122,11 @@ class playGame extends Phaser.Scene{
 
 		// Message box for communicating with the user
 		this.messageBox = null;
-
-		// to handle movement of everything which may move
-		this.movement = new MovementHandler(this);
 		
 		//Groups in phaser are a way for us to manage similar game objects and control them as one unit. eg. for collision.
 		this.players = this.add.group();
 		this.physics.world.enableBody(this.players);
 		
-		// to handle animation of everything
-		this.animation = new AnimationHandler(this);
 		this.animation.createAnimations();
 		
 		//finish target
@@ -136,9 +134,6 @@ class playGame extends Phaser.Scene{
 		this.finishSprite = this.add.sprite(672, 550, 'finish'); //debugging purpose
 		this.physics.world.enableBody(this.finishSprite);
 
-		//Note: arrow function => doesn't create its own "this". That's why we can reference 
-		//		this.finishSprite inside of it.
-		this.collisionHandler = new CollisionHandler(this);
 		/* 
 			Add collider function takes 2 groups/objects which can collide as its first two arguments
 			as the third argument, it takes a callback function which will be fired when they collide.
@@ -157,12 +152,14 @@ class playGame extends Phaser.Scene{
 		let wallLayer = map1.createStaticLayer("wall", [tileset], 80, 60);
 
 		wallLayer.setCollisionByProperty({collides: true});
+		//collision by tile property
+		boundaryLayer.setCollisionByProperty({collides: true});
 
 		//map collision
-		this.physics.add.collider(this.players, wallLayer);
-		this.physics.add.collider(this.players, boundaryLayer);
-			//collision by tile property
-		boundaryLayer.setCollisionByProperty({collides: true});
+		// this.physics.add.collider(this.players, wallLayer);
+		this.collisionHandler.addCollider(this.players, wallLayer);
+		// this.physics.add.collider(this.players, boundaryLayer);
+		this.collisionHandler.addCollider(this.players, boundaryLayer);
 
 		/*
 			Using Phaser’s built-in keyboard manager
