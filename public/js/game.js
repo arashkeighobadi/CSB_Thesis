@@ -33,18 +33,13 @@ window.onload = function() {
 		},
 	
 		//we embedded a scene object which will use the  preload, update, and  create functions we defined.
-		scene: [preloadGame, playGame]
-		// {
-		// 	preload: preload,
-		// 	create: create,
-		// 	update: update
-		// }
+		scene: [PreloadGame, PlayGame]
 	};
 	//we passed our config object to Phaser when we created the new game instance.
 	game = new Phaser.Game(config);
 }
 
-class preloadGame extends Phaser.Scene{
+class PreloadGame extends Phaser.Scene{
 	constructor(){
 		super("PreloadGame");
 	}
@@ -63,34 +58,53 @@ class preloadGame extends Phaser.Scene{
 	}
 }
 
-class playGame extends Phaser.Scene{
+class PlayGame extends Phaser.Scene{
 	constructor(){
 		super("PlayGame");
+		this.clientNet = new ClientNet(this);
 		this.socket = null;
+		this.player1 = null;
 		this.opponent = null;
 		this.messageBox = null;
-		this.movement = null;
+		// to handle movement of everything which may move
+		this.movement = new MovementHandler(this);
+		// to handle collision of everything
+		this.collisionHandler = new CollisionHandler(this);
+		// to handle animation of everything
+		this.animation = new AnimationHandler(this);
 		this.pause = false;
+
 
 	}
 	create() {
 		this.socket = io().on('connect', () => {
+
+			this.loadGame();
+			//ask the user if tey are ready
 			this.messageBox = new MessageBox(this, "Ready?");
+
+			//if the user clicks on yes, the callback function is fired
 			this.messageBox.addButton("YES", () => {
 				this.messageBox.text1.setText("Searching...");
-				//sending the email of the logged in user in order to have 
-				//it mapped to the player stored on the server side.
-				this.socket.emit('searching', sessionStorage.getItem('email'));
-				this.socket.on('matched', players => {
-					console.log("found match" );					
-					this.loadGame(players);
+				//make the yes button disabled. Otherwise it can be pressed again.
+				this.input.disable(this.messageBox.button);
+				/* 	
+					-client net sends a req to server to find a match.
+					-server sends back player objects once found a match.
+					-then the call back function which is defined below is fired.
+				*/
+				this.clientNet.searchForOpponent( (players) => {
+					//we load the players after server responds
+					this.loadPlayers(players);
+					//we hide the message box
+					this.messageBox.hideBox();
+					//we ask clientNet to listen to further messages coming from the server
+					this.clientNet.listenToServer();
+					//now, if this.pause is true, we set it to false so the handleMoveEvent can work				
 					if(this.pause){
 						this.pause = false;
 					}
 				});
-
-				// this.messageBox.hideBox();
-				console.log("clicked");
 			});
 		});
 	}
@@ -104,20 +118,15 @@ class playGame extends Phaser.Scene{
 	}
 	
 	/*===============================   Functions used in create()	===============================*/
-	loadGame = function(players) {
-		this.messageBox.hideBox();
+	loadGame = function() {
 
-		
-		// to handle movement of everything which may move
-		this.movement = new MovementHandler(this);
+		// Message box for communicating with the user
+		this.messageBox = null;
 		
 		//Groups in phaser are a way for us to manage similar game objects and control them as one unit. eg. for collision.
 		this.players = this.add.group();
 		this.physics.world.enableBody(this.players);
 		
-		
-		// to handle animation of everything
-		this.animation = new AnimationHandler(this);
 		this.animation.createAnimations();
 		
 		//finish target
@@ -125,34 +134,11 @@ class playGame extends Phaser.Scene{
 		this.finishSprite = this.add.sprite(672, 550, 'finish'); //debugging purpose
 		this.physics.world.enableBody(this.finishSprite);
 
-		//Note: arrow function => doesn't create its own "this". That's why we can reference 
-		//		this.finishSprite inside of it.
-		this.physics.add.collider(this.players, this.finishSprite,  (playerContainer, finishSprite) => {
-			// console.log(player);
-			let id = playerContainer.playerId;
-			if (this.player1.playerContainer.playerId == id){
-				this.player1.scoreUp();
-				console.log("You won!");
-				this.messageBox = new MessageBox(this, "You Won!");
-				this.messageBox.addButton("PLAY AGAIN", () => {
-					this.pause = true;
-					this.messageBox.hideBox();
-					this.scene.restart();
-					console.log("clicked");
-				});
-			} else {
-				// console.log(this.playersList[id].username + " won!");
-				let txt = this.opponent.name + " won!";
-				this.messageBox = new MessageBox(this, txt);
-				this.messageBox.addButton("PLAY AGAIN", () => {
-					this.pause = true;
-					this.messageBox.hideBox();
-					this.scene.restart();
-					console.log("clicked");
-				});
-			}
-			this.finishSprite.destroy();			
-		});
+		/* 
+			Add collider function takes 2 groups/objects which can collide as its first two arguments
+			as the third argument, it takes a callback function which will be fired when they collide.
+		 */
+		this.collisionHandler.addCollider(this.players, this.finishSprite, this.playerCollidesTarget);
 
 		//making a tilemap
 		let map1 = this.make.tilemap({ key: "map1" }); /* , tileWidth: 40, tileHeight: 30 */
@@ -166,89 +152,77 @@ class playGame extends Phaser.Scene{
 		let wallLayer = map1.createStaticLayer("wall", [tileset], 80, 60);
 
 		wallLayer.setCollisionByProperty({collides: true});
-		//map collision
-		this.physics.add.collider(this.players, wallLayer);
-		this.physics.add.collider(this.players, boundaryLayer);
-			//collision by tile property
+		//collision by tile property
 		boundaryLayer.setCollisionByProperty({collides: true});
 
-		// Message box for communicating with the user
-		this.messageBox = null;
+		//map collision
+		// this.physics.add.collider(this.players, wallLayer);
+		this.collisionHandler.addCollider(this.players, wallLayer);
+		// this.physics.add.collider(this.players, boundaryLayer);
+		this.collisionHandler.addCollider(this.players, boundaryLayer);
 
-		this.listenToServer(players);
+		/*
+			Using Phaser’s built-in keyboard manager
 
+			this will populate the cursors object with 
+			our four main Key objects (up, down, left, and 
+			right), which will bind to those arrows on the keyboard. 
+			Then, we just need to see if these keys are being held down 
+			in the  update function.
+		*/
+		this.cursors = this.input.keyboard.createCursorKeys();
 	}
 
-	listenToServer = function (players){
-
-		let self = this;
+	//assigns the player objects which has recieved from server to player1 and opponent
+	loadPlayers(players){
+		let that = this;
 		//to loop through the players, we use Object.keys() to create an array of all the keys in the Object that is passed in
 		//we use forEach() method to loop through each item in the array.
-		console.log("listen to server " + players);
 		Object.keys(players).forEach(
 			function (id) {
 				console.log("adding players");
-				if (players[id].playerId === self.socket.id) {
-					console.log("adding self");
+				if (players[id].playerId === that.socket.id) {
 					//passes it the current player’s information, and a reference to the current scene.
-					self.player1 = new Player(self, players[id]);
-				} else {//if players[id] is not the current player.
-					console.log("adding other");
-					self.addOtherPlayers(self, players[id]);
+					that.player1 = new Player(that, players[id]);
+				} else {//if players[id] is not the current player.			
+					that.opponent = new Player(that, players[id]);
+					that.opponent.playerContainer.body.setAllowGravity(false);
 				}
 			}
-		);
-	
-		//When the disconnect event is fired, we take that player’s id and we remove that player from the game.
-		self.socket.on('disconnect', 
-			function (playerId) {
-				console.log("disconnect");
-				//The  getChildren() method will return an array of all the game objects that are in othePlayers group
-				self.players.getChildren().forEach(
-					function(player) {
-						if (playerId === player.playerId) {
-							//to remove that game object from the game
-							player.destroy();
-						}
-					}
-				);
+		);				
+	}
+
+	playerCollidesTarget(self, playerContainer, finishSprite) {
+		// console.log("type of : " + typeof(this.players));
+			let id = playerContainer.playerId;
+			if (self.player1.playerContainer.playerId == id){
+				self.player1.scoreUp();
+				console.log("You won!");
+				self.messageBox = new MessageBox(self, "You Won!");
+				self.messageBox.addButton("PLAY AGAIN", () => {
+					self.pause = true;
+					self.messageBox.hideBox();
+					self.scene.restart();
+					console.log("clicked");
+				});
+			} else {
+				// console.log(self.playersList[id].username + " won!");
+				let txt = self.opponent.name + " won!";
+				self.messageBox = new MessageBox(self, txt);
+				self.messageBox.addButton("PLAY AGAIN", () => {
+					self.pause = true;
+					self.messageBox.hideBox();
+					self.scene.restart();
+					console.log("clicked");
+				});
 			}
-		);
-		//using Phaser’s built-in keyboard manager
-		/*
-		this will populate the cursors object with 
-		our four main Key objects (up, down, left, and 
-		right), which will bind to those arrows on the keyboard. 
-		Then, we just need to see if these keys are being held down 
-		in the  update function.
-		*/
-		self.cursors = self.input.keyboard.createCursorKeys();
-		
-		//when playerMoved event is emitted, we will need to update that player’s sprite in the game
-		self.socket.on('playerMoved', function (playerInfo) {
-			let player = self.opponent;
-			player.playerContainer.setPosition(playerInfo.x, playerInfo.y ); //hacky way of synchronizing Y location
-			player.xVelocity = playerInfo.xVelocity;
-			player.yVelocity = playerInfo.yVelocity;
-		});
-	
+			self.finishSprite.destroy();		
 	}
-	
-	/*==============  Sub-Functions  ==============*/			
-	addOtherPlayers = function(self, playerInfo) {
-		
-		const otherPlayer = new Player(self, playerInfo);
-		otherPlayer.playerContainer.body.setAllowGravity(false);
-		self.opponent = otherPlayer;
-		// self.otherPlayers.add(otherPlayer.playerContainer);
-		// self.players.add(otherPlayer.playerContainer);
-	}
-	
+
 	/*===============================   Functions used in update()	===============================*/
 	handleMoveEvent(self){
-		if(self.pause){
-			return;
-		}
+		if(self.pause){ return; }
+
 		//The angular velocity will allow the soldier to rotate left and right.
 		if (self.cursors.left.isDown) {
 			self.movement.move('left', self.player1);
@@ -262,8 +236,6 @@ class playGame extends Phaser.Scene{
 		else if (self.cursors.down.isDown) {
 			self.movement.move('down', self.player1);
 		}
-	
-	
 		
 		//when left or right is released the animation stops
 		if (self.cursors.left.isUp && self.player1.movement === self.movement.movingDirections.LEFT) {
@@ -278,7 +250,6 @@ class playGame extends Phaser.Scene{
 		else if (self.cursors.down.isUp && self.player1.movement === self.movement.movingDirections.DOWN) {
 			self.movement.stop('down', self.player1);
 		}
-		
 		
 		//if the player goes off screen we want it to appear on the other side of the screen.
 		//we pass it the game object we want to wrap and an offset.
@@ -312,5 +283,7 @@ import { MovementHandler } from "./movementHandler.js";
 import { Player } from "./player.js";
 import { AnimationHandler } from "./animationHandler.js";
 import { MessageBox } from "./messageBox.js";
+import { ClientNet } from "./clientNet.js";
+import { CollisionHandler } from "./collisionHandler.js";
 
 
