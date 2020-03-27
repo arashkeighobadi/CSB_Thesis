@@ -65,9 +65,16 @@ class Application {
     
     setupDatabase() {
         // DB config
-        const db = require('./config/keys').MongoURI;
+        this.db = null;
+        try {
+            this.db = require('./config/keys').MongoURI;
+        } catch (e) {
+            console.log("NOTE!!!! You need to create /config/keys.js file and export an object with a property called MongoURI and its API key as its string value.");
+        }
+        
+
         // Connect to Mongo
-        this.mongoose.connect(db, { useNewUrlParser: true}) //returns a promise so we handle it in the following.
+        this.mongoose.connect(this.db, { useNewUrlParser: true}) //returns a promise so we handle it in the following.
             .then(() => console.log('MongoDB Connected...'))
             .catch(err => console.log(err));
         
