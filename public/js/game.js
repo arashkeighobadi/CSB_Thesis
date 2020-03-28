@@ -27,7 +27,7 @@ window.onload = function() {
 		physics: {
 			default: 'arcade',
 			arcade: {
-				debug: true,
+				debug: false,
 				// gravity: { x: 0, y: 0 }
 			}
 		},
@@ -46,7 +46,11 @@ class PreloadGame extends Phaser.Scene{
 	preload(){
 		this.load.spritesheet('player1Sprite', 'assets/p1.jpg', { frameWidth: 14, frameHeight: 14 });
 		this.load.spritesheet('player2Sprite', 'assets/p2.jpg', { frameWidth: 14, frameHeight: 14 });
+		this.load.spritesheet('locator', 'assets/game/sprites/soldier/locator.png', { frameWidth: 32, frameHeight: 32 });
+		this.load.image('locator-1', 'assets/game/sprites/soldier/locator-1.png');
+		this.load.image('locator-2', 'assets/game/sprites/soldier/locator-2.png');
 		this.load.image('finish', 'assets/game/sprites/star_gold.png');
+		this.load.atlas('soldier', 'assets/game/sprites/soldier/soldier-move.png', 'assets/game/sprites/soldier/soldier-move.json');
 		// this.load.image('ground', '/assets/platform.png');
 
 		this.load.image("terrain", "assets/game/maps/terrain_atlas512x.png");
@@ -77,6 +81,9 @@ class PlayGame extends Phaser.Scene{
 
 	}
 	create() {
+		// set background color of the camera
+		// this.cameras.main.setBackgroundColor('707070');
+
 		this.socket = io().on('connect', () => {
 
 			this.loadGame();
@@ -128,10 +135,12 @@ class PlayGame extends Phaser.Scene{
 		this.physics.world.enableBody(this.players);
 		
 		this.animation.createAnimations();
+
+		
 		
 		//finish target
-		// this.finishSprite = this.add.sprite(128, 50, 'finish');
-		this.finishSprite = this.add.sprite(672, 550, 'finish'); //debugging purpose
+		this.finishSprite = this.add.sprite(128, 50, 'finish');
+		// this.finishSprite = this.add.sprite(672, 550, 'finish'); //debugging purpose
 		this.physics.world.enableBody(this.finishSprite);
 
 		/* 
@@ -267,7 +276,8 @@ class PlayGame extends Phaser.Scene{
 		{
 			// emit player movement
 			self.socket.emit('playerMovement', { x: self.player1.getX(), y: self.player1.getY(), 
-				xVelocity: self.player1.get_xVelocity(), yVelocity: self.player1.get_yVelocity()});
+				xVelocity: self.player1.get_xVelocity(), yVelocity: self.player1.get_yVelocity(), 
+				spriteAngle: self.player1.spriteAngle});
 		}
 		 
 		// save old position data

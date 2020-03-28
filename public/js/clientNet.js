@@ -49,6 +49,9 @@ export class ClientNet {
 
     moveOpponent(opponentInfo) {
         let opponent = this.playGameScene.opponent;
+        let oppAngle = opponentInfo.spriteAngle;
+        opponent.spriteAngle = oppAngle;
+        opponent.playerContainer.setAngle(oppAngle);
         opponent.playerContainer.setPosition(opponentInfo.x, opponentInfo.y );
         opponent.xVelocity = opponentInfo.xVelocity;
         opponent.yVelocity = opponentInfo.yVelocity;

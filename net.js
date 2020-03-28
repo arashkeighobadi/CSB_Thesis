@@ -41,8 +41,10 @@ module.exports = class Net {
                 that.players[socket.id] = {
                     playerId: socket.id,
                     playerNumber: that.siteVisitorNumber,
+                    // Angle is determined in searchForMatch method
+                    spriteAngle: null,
                     // the x value of the middle of the entrance is 672 so +/- 50 makes starting fair
-                    // x will be determined when they find a match
+                    // x will be determined when they find a match. i.e. in searchForMatch method
                     x: null/* (that.siteVisitorNumber % 2 == 0) ? 622 : 722 */,
                     y: /* Math.floor(Math.random() * 300) + */ 550,
                     xVelocity: 0,
@@ -98,6 +100,7 @@ module.exports = class Net {
                         let player = that.players[socket.id];
                         let opponentId = player.opponentId;
 
+                        player.spriteAngle = movementData.spriteAngle;
                         player.x = movementData.x;
                         player.y = movementData.y;
                         player.xVelocity = movementData.xVelocity;
@@ -139,8 +142,10 @@ module.exports = class Net {
 
             searcher.team = "team1";
             searcher.x = 622;
+            searcher.spriteAngle = 0;
             opponent.team = "team2";
             opponent.x = 722;
+            opponent.spriteAngle = 180;
 
             opponent.opponentId = searcher.playerId;
             searcher.opponentId = opponent.playerId;

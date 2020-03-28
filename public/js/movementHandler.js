@@ -22,25 +22,34 @@ export class MovementHandler {
 
 
     move = function(direction, object) {
+        let that = this.playGameScene;
 
         if(object === this.playGameScene.player1){
             switch(direction){
                 case 'left':
                     object.movement = this.movingDirections.LEFT;
                     object.playerContainer.body.setVelocityX((-1)*object.speed);
+                    object.playerContainer.setAngle(180);
+                    object.spriteAngle = 180;
                     break;
                 case 'right':
                     object.movement = this.movingDirections.RIGHT;
                     object.playerContainer.body.setVelocityX(object.speed);
-                    break;
+                    object.playerContainer.setAngle(0);
+                    object.spriteAngle = 0;
+                break;
                 case 'up':
                     object.movement = this.movingDirections.UP;
                     object.playerContainer.body.setVelocityY((-1)*object.speed);
+                    object.playerContainer.setAngle(270);
+                    object.spriteAngle = 270;
                     break;
                 case 'down':
                     object.movement = this.movingDirections.DOWN;
                     object.playerContainer.body.setVelocityY(object.speed);
-                    break;
+                    object.playerContainer.setAngle(90);
+                    object.spriteAngle = 90;
+                break;
                 }
         }
     }
