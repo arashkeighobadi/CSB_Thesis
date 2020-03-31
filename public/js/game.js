@@ -83,7 +83,7 @@ class PlayGame extends Phaser.Scene{
 	create() {
 		// set background color of the camera
 		// this.cameras.main.setBackgroundColor('707070');
-
+		// this.grid = this.add.grid(400, 300, 800, 600, 16, 16, null, null, 0xffffff, 0.3);
 		this.socket = io().on('connect', () => {
 
 			this.loadGame();
@@ -139,8 +139,8 @@ class PlayGame extends Phaser.Scene{
 		
 		
 		//finish target
-		this.finishSprite = this.add.sprite(128, 50, 'finish');
-		// this.finishSprite = this.add.sprite(672, 550, 'finish'); //debugging purpose
+		// this.finishSprite = this.add.sprite(128, 50, 'finish');
+		this.finishSprite = this.add.sprite(672, 550, 'finish'); //debugging purpose
 		this.physics.world.enableBody(this.finishSprite);
 
 		/* 
@@ -164,12 +164,13 @@ class PlayGame extends Phaser.Scene{
 		//collision by tile property
 		boundaryLayer.setCollisionByProperty({collides: true});
 
-		//map collision
+		//player - map collision
 		// this.physics.add.collider(this.players, wallLayer);
 		this.collisionHandler.addCollider(this.players, wallLayer);
 		// this.physics.add.collider(this.players, boundaryLayer);
 		this.collisionHandler.addCollider(this.players, boundaryLayer);
-
+		
+		
 		/*
 			Using Phaser’s built-in keyboard manager
 
@@ -190,21 +191,22 @@ class PlayGame extends Phaser.Scene{
 		Object.keys(players).forEach(
 			function (id) {
 				console.log("adding players");
-				if (players[id].playerId === that.socket.id) {
+				if (players[id].charID === that.socket.id) {
 					//passes it the current player’s information, and a reference to the current scene.
 					that.player1 = new Player(that, players[id]);
 				} else {//if players[id] is not the current player.			
 					that.opponent = new Player(that, players[id]);
-					that.opponent.playerContainer.body.setAllowGravity(false);
+					that.opponent.charContainer.body.setAllowGravity(false);
 				}
 			}
 		);				
 	}
 
-	playerCollidesTarget(self, playerContainer, finishSprite) {
+
+	playerCollidesTarget(self, charContainer, finishSprite) {
 		// console.log("type of : " + typeof(this.players));
-			let id = playerContainer.playerId;
-			if (self.player1.playerContainer.playerId == id){
+			let id = charContainer.charID;
+			if (self.player1.charContainer.charID == id){
 				self.player1.scoreUp();
 				console.log("You won!");
 				self.messageBox = new MessageBox(self, "You Won!");

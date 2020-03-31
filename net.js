@@ -5,23 +5,24 @@ module.exports = class Net {
         this.io = require('socket.io').listen(that.server);
         //to keep track of all the players that are currently in the game.
         this.players = {};
-
+        
         //array of players who are waiting for an opponent. First one has waited the longest.
         this.waiting = [];
-
+        
         //confidential list of all players where we store emails and ID's
         //!!! DO NOT SEND IT TO THE CLIENTS !!!
         this.confidentialPlayers = {};
+        
 
         //each group contains two players. the first player's id will be the index of the group.
-        this.groups = {};
+        // this.groups = {};
 
         this.siteVisitorNumber = 0;
     }
 
     //the message to be sent, the object to be sent, the socket id of the target
-    outgoingHandler(msg, obj, playerID) {
-        this.io.to(`${playerID}`).emit(msg, obj);
+    outgoingHandler(msg, obj, charID) {
+        this.io.to(`${charID}`).emit(msg, obj);
     }
 
     //this is called from app.js
@@ -39,28 +40,18 @@ module.exports = class Net {
                 
                 // create a new player and add it to our players object
                 that.players[socket.id] = {
-                    playerId: socket.id,
-                    playerNumber: that.siteVisitorNumber,
+                    charID: socket.id,
                     // Angle is determined in searchForMatch method
                     spriteAngle: null,
                     // the x value of the middle of the entrance is 672 so +/- 50 makes starting fair
                     // x will be determined when they find a match. i.e. in searchForMatch method
-                    x: null/* (that.siteVisitorNumber % 2 == 0) ? 622 : 722 */,
-                    y: /* Math.floor(Math.random() * 300) + */ 550,
+                    x: null,
+                    y: 550,
                     xVelocity: 0,
                     yVelocity: 0,
                     // team will be determined when they find a match
-                    team: null /* (that.siteVisitorNumber % 2 == 1) ? 'team1' : 'team2' */
+                    team: null 
                 };
-    
-                if(that.siteVisitorNumber % 2 == 1){
-                    that.groups[that.siteVisitorNumber] = {
-                        firstPlayer: that.players[socket.id]
-                    };
-                }
-                else {
-                    that.groups[that.siteVisitorNumber-1].secondPlayer = that.players[socket.id];
-                }
     
                 socket.on("searching", function (playerEmail) {
                     that.confidentialPlayers[socket.id] = {playerEmail: playerEmail};
@@ -147,10 +138,10 @@ module.exports = class Net {
             opponent.x = 722;
             opponent.spriteAngle = 180;
 
-            opponent.opponentId = searcher.playerId;
-            searcher.opponentId = opponent.playerId;
-            this.outgoingHandler('matched', players, opponent.playerId);
-            this.outgoingHandler('matched', players, searcher.playerId);
+            opponent.opponentId = searcher.charID;
+            searcher.opponentId = opponent.charID;
+            this.outgoingHandler('matched', players, opponent.charID);
+            this.outgoingHandler('matched', players, searcher.charID);
         }
         else {
             this.players[socket.id].opponentId = null;

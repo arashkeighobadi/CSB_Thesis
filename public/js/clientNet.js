@@ -23,8 +23,8 @@ export class ClientNet {
         let self = this;
 	
 		//When the disconnect event is fired, we take that player’s id and we remove that player from the game.
-		that.socket.on('disconnect', playerId => {
-			self.playerDisconnected(playerId);
+		that.socket.on('disconnect', charID => {
+			self.playerDisconnected(charID);
 		});
 		
 		//when playerMoved event is emitted, we will need to update that player’s sprite in the game
@@ -34,12 +34,12 @@ export class ClientNet {
 	}
 
 
-    playerDisconnected(playerId) {
+    playerDisconnected(charID) {
             console.log("disconnect");
             //The  getChildren() method will return an array of all the game objects that are in othePlayers group
             this.playGameScene.players.getChildren().forEach(
                 function(player) {
-                    if (playerId === player.playerId) {
+                    if (charID === player.charID) {
                         //to remove that game object from the game
                         player.destroy();
                     }
@@ -51,8 +51,8 @@ export class ClientNet {
         let opponent = this.playGameScene.opponent;
         let oppAngle = opponentInfo.spriteAngle;
         opponent.spriteAngle = oppAngle;
-        opponent.playerContainer.setAngle(oppAngle);
-        opponent.playerContainer.setPosition(opponentInfo.x, opponentInfo.y );
+        opponent.charContainer.setAngle(oppAngle);
+        opponent.charContainer.setPosition(opponentInfo.x, opponentInfo.y );
         opponent.xVelocity = opponentInfo.xVelocity;
         opponent.yVelocity = opponentInfo.yVelocity;
     }
