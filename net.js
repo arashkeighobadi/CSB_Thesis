@@ -131,10 +131,12 @@ module.exports = class Net {
             let searcher = this.waiting.shift();
             let players = {searcher, opponent};
 
-            searcher.team = "team1";
-            searcher.x = 622;
+            searcher.team = 'A';
+            // searcher.x = 622;//debug
+            searcher.x = 128;
+            searcher.y = 60;
             searcher.spriteAngle = 0;
-            opponent.team = "team2";
+            opponent.team = 'B';
             opponent.x = 722;
             opponent.spriteAngle = 180;
 

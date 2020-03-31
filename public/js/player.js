@@ -27,11 +27,11 @@ export class Player extends Character {
         this.locatorBoundary = null;
         
         //to change the color of the locatorBoundary, depending on the team that was generated when we created our player info on the server.
-        if (playerInfo.team === 'team1') {
+        if (playerInfo.team === 'A') {
             this.locatorBoundary = that.add.sprite(0, 0, 'locator-1');
             // this.locator.setTint('ffef00');
         } 
-        else if (playerInfo.team === 'team2') {
+        else if (playerInfo.team === 'B') {
             // this.bodySprite = that.add.sprite(0, 0/* container/2 - bodySprite/2 */, 'player2Sprite').setScale(0.4);//.setOrigin(0.5); //0.5 means middle of the sprite
             this.locatorBoundary = that.add.sprite(0, 0, 'locator-2');
             // this.locator.setTint('ffff66');            

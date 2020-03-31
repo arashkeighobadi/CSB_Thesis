@@ -70,6 +70,8 @@ class PlayGame extends Phaser.Scene{
 		this.player1 = null;
 		this.opponent = null;
 		this.messageBox = null;
+		this.baseACollectable = null;
+		this.baseBCollectable = null;
 		// to handle movement of everything which may move
 		this.movement = new MovementHandler(this);
 		// to handle collision of everything
@@ -140,14 +142,26 @@ class PlayGame extends Phaser.Scene{
 		
 		//finish target
 		// this.finishSprite = this.add.sprite(128, 50, 'finish');
-		this.finishSprite = this.add.sprite(672, 550, 'finish'); //debugging purpose
-		this.physics.world.enableBody(this.finishSprite);
+		// this.finishSprite = this.add.sprite(672, 550, 'finish'); //debugging purpose
+		// this.physics.world.enableBody(this.finishSprite);
+		// this.baseACollectable = new BaseCollectable(this, 672, 580, 'finish');//debug
+		this.baseACollectable = new BaseCollectable(this, 128, 50, 'finish');
+		this.baseACollectable.enableBody();
+		this.baseACollectable.setOwnerTeam('A');
+		
+		this.baseBCollectable = new BaseCollectable(this, 672, 550, 'finish');
+		this.baseBCollectable.enableBody();
+		this.baseBCollectable.setOwnerTeam('B');
 
 		/* 
 			Add collider function takes 2 groups/objects which can collide as its first two arguments
 			as the third argument, it takes a callback function which will be fired when they collide.
 		 */
-		this.collisionHandler.addCollider(this.players, this.finishSprite, this.playerCollidesTarget);
+		// this.collisionHandler.addCollider(this.players, this.baseACollectable.bodySprite, this.baseACollectable.playerCollision);
+		// this.collisionHandler.addCollider(this.players, this.baseBCollectable.bodySprite, this.baseBCollectable.playerCollision);
+		this.collisionHandler.addOverlap(this.players, this.baseACollectable.bodySprite, this.baseACollectable.playerCollision);
+		this.collisionHandler.addOverlap(this.players, this.baseBCollectable.bodySprite, this.baseBCollectable.playerCollision);
+
 
 		//making a tilemap
 		let map1 = this.make.tilemap({ key: "map1" }); /* , tileWidth: 40, tileHeight: 30 */
@@ -297,5 +311,7 @@ import { AnimationHandler } from "./animationHandler.js";
 import { MessageBox } from "./messageBox.js";
 import { ClientNet } from "./clientNet.js";
 import { CollisionHandler } from "./collisionHandler.js";
+//stands for base collectable. i.e. the collectable in the opponent's base
+import { BaseCollectable } from "./collectables/baseCollectable.js"; 
 
 

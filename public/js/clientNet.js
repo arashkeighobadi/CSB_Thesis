@@ -13,7 +13,7 @@ export class ClientNet {
         that.socket.emit('searching', sessionStorage.getItem('email'));
         that.socket.on('matched', players => {
             
-            console.log("found match" );
+            console.log("found match : " + players);
             callback(players);
         });
     }
