@@ -40,6 +40,7 @@ export class ClientNet {
 
         that.socket.on('shoot', bulletInfo => {
             let bullet = new Bullet(that, bulletInfo.x, bulletInfo.y, 'bullet', bulletInfo.owner);
+            bullet.bodySprite.setAngle(bulletInfo.spriteAngle);
 	        bullet.setVelocity(bulletInfo.xDir * bullet.speed, bulletInfo.yDir * bullet.speed);
 		});
 	}

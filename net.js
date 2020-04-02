@@ -149,7 +149,8 @@ module.exports = class Net {
                         y: player.y,
                         xDir: direction.x,
                         yDir: direction.y,
-                        owner: player
+                        owner: player,
+                        spriteAngle: player.spriteAngle
                     };
                     self.outgoingHandler('shoot', bulletInfo, player.opponentId);
                     self.outgoingHandler('shoot', bulletInfo, socket.id);

@@ -3,7 +3,7 @@ export class Explosive {
         this.playGameScene = that;
         this.ownerTeam = null;
         this.owner = null;
-        this.bodySprite = that.add.sprite(x, y, name);
+        this.bodySprite = that.physics.add.image(x, y, name);
         this.bodySprite.owner = this.owner;
         this.bodySprite.ownerTeam = this.ownerTeam;
     }

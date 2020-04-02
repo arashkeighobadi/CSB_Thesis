@@ -51,7 +51,7 @@ class PreloadGame extends Phaser.Scene{
 		this.load.image('locator-2', 'assets/game/sprites/soldier/locator-2.png');
 		this.load.image('finish', 'assets/game/sprites/star_gold.png');
 		this.load.atlas('soldier', 'assets/game/sprites/soldier/soldier-move.png', 'assets/game/sprites/soldier/soldier-move.json');
-		this.load.image('bullet', 'assets/bomb-4x4.png', { frameWidth: 4, frameHeight: 4 });
+		this.load.image('bullet', 'assets/Light_Shell_yellow_10x10.png');
 		
 		// this.load.image('ground', '/assets/platform.png');
 

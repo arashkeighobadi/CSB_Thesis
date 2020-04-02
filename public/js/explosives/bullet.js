@@ -1,14 +1,14 @@
 export class Bullet extends Explosive {
     constructor(that, x, y, name, owner){
         super(that, x, y, name);
+        this.bodySprite.setSize(4,4);
         this.owner = owner;
         this.bodySprite.owner = owner;
         this.speed = 500;
         that.bullets.add(this.bodySprite);
-
         // this.index = this.playGameScene.bulletList.length;
         // that.bulletList[this.index] = this;
-        this.bodySprite.setTint(0xffff00);
+        // this.bodySprite.setTint(0xffff00);
         
         this.enableBody();
         this.setCollideWorldBound(true);
