@@ -21,5 +21,40 @@ export class CollisionHandler {
             }
         });
     }
+
+    playerBulletCollision(that, player, bullet){
+        if(player.charID != bullet.owner.charID ){
+            bullet.destroy();
+            player.destroy();
+            if(player.charID != that.player1.charID){
+                that.playerWon();
+            }
+            else {
+                that.playerLost();
+            }
+            // that.players.getChildren().forEach(
+            //     function(p) {
+            //         console.log("debug");
+            //         console.log(player.charID);
+            //         console.log(p.charID);
+            //         if (player.charID === p.charID) {
+            //             that.playerLost();
+            //             //to remove that game object from the game
+            //         }
+            //         else {
+            //             that.playerWon();
+            //         }
+            //     }
+            // );
+        }
+    }
+
+    bulletMapWallCollision(that, bullet, wall){
+        bullet.destroy();
+    }
+    
+    bulletMapBoundCollision(that, bullet, bound){
+        bullet.destroy();
+    }
     
 }

@@ -12,18 +12,19 @@ export class BaseCollectable extends Collectable{
                 let id = charContainer.charID;
                 let ownTeam = that.player1.team;
                 let oppTeam = that.opponent.team;
-                console.log("ownTeam : " + ownTeam);
-                console.log("charContainer.team : " + charContainer.team);
-                console.log(charContainer.team === ownTeam);
-                console.log("bodySprite.ownerTeam : " + bodySprite.ownerTeam);
-                console.log("ownTeam : " + ownTeam);
-                console.log(bodySprite.ownerTeam != ownTeam);
+                // console.log("ownTeam : " + ownTeam);
+                // console.log("charContainer.team : " + charContainer.team);
+                // console.log(charContainer.team === ownTeam);
+                // console.log("bodySprite.ownerTeam : " + bodySprite.ownerTeam);
+                // console.log("ownTeam : " + ownTeam);
+                // console.log(bodySprite.ownerTeam != ownTeam);
                 if (charContainer.team === ownTeam && bodySprite.ownerTeam != ownTeam){
                     that.player1.scoreUp();
                     console.log("You won!");
-                    //   bodySprite.destroy();
                     that.baseACollectable.bodySprite.destroy();
+                    delete that.baseACollectable;
                     that.baseBCollectable.bodySprite.destroy();
+                    delete that.baseBCollectable;
                     that.messageBox = new MessageBox(that, "You Won!");
                     that.messageBox.addButton("PLAY AGAIN", () => {
                         that.pause = true;

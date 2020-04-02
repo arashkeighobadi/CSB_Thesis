@@ -1,4 +1,5 @@
 import { MessageBox } from "./messageBox.js";
+import { Bullet } from "./explosives/bullet.js";
 
 export class ClientNet {
     
@@ -6,11 +7,16 @@ export class ClientNet {
         this.playGameScene = that;
     }
 
+    // emits a message and an object to the server
+    emit(msg, obj){
+        this.playGameScene.socket.emit(msg, obj);
+    }
+
     searchForOpponent(callback) {
         let that = this.playGameScene;
         //sending the email of the logged in user in order to have 
         //it mapped to the player stored on the server side.
-        that.socket.emit('searching', sessionStorage.getItem('email'));
+        this.emit('searching', sessionStorage.getItem('email'));
         that.socket.on('matched', players => {
             
             console.log("found match : " + players);
@@ -30,6 +36,11 @@ export class ClientNet {
 		//when playerMoved event is emitted, we will need to update that player’s sprite in the game
 		that.socket.on('playerMoved', function (opponentInfo) {
 			self.moveOpponent(opponentInfo);
+		});
+
+        that.socket.on('shoot', bulletInfo => {
+            let bullet = new Bullet(that, bulletInfo.x, bulletInfo.y, 'bullet', bulletInfo.owner);
+	        bullet.setVelocity(bulletInfo.xDir * bullet.speed, bulletInfo.yDir * bullet.speed);
 		});
 	}
 

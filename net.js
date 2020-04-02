@@ -27,19 +27,19 @@ module.exports = class Net {
 
     //this is called from app.js
     listen() {
-        let that = this;
+        let self = this;
         //added logic to listen for connections and disconnections.
         this.io.on('connection', 
             function (socket) {		
                 console.log('a user connected. id: ' + socket.id);
 
                 //increase the number of people visited the site by one
-                that.siteVisitorNumber++;
+                self.siteVisitorNumber++;
 
-                console.log('visitor number : ' + that.siteVisitorNumber);
+                console.log('visitor number : ' + self.siteVisitorNumber);
                 
                 // create a new player and add it to our players object
-                that.players[socket.id] = {
+                self.players[socket.id] = {
                     charID: socket.id,
                     // Angle is determined in searchForMatch method
                     spriteAngle: null,
@@ -54,20 +54,20 @@ module.exports = class Net {
                 };
     
                 socket.on("searching", function (playerEmail) {
-                    that.confidentialPlayers[socket.id] = {playerEmail: playerEmail};
+                    self.confidentialPlayers[socket.id] = {playerEmail: playerEmail};
                     //accessing DB and getting the name of the player who just got connected, using their email
-                    that.application.getUsers({ email: playerEmail}).then( users => {
+                    self.application.getUsers({ email: playerEmail}).then( users => {
                         users.forEach(user => {
-                            that.players[socket.id].name = user.name;
-                            that.players[socket.id].score = user.wins;
+                            self.players[socket.id].name = user.name;
+                            self.players[socket.id].score = user.wins;
                             console.log("score : " + user.wins);
                         });
                         console.log("here : " + playerEmail); //debug
                         
                         //the following call are inside then because they need to wait for the 
                         //query result and then be executed
-                        that.waiting.unshift(that.players[socket.id]);
-                        that.searchForMatch(socket);
+                        self.waiting.unshift(self.players[socket.id]);
+                        self.searchForMatch(socket);
                     }).catch (err => {
                         throw err;
                     });
@@ -77,18 +77,18 @@ module.exports = class Net {
                 socket.on('disconnect', 
                     function () {
                         console.log('user disconnected');
-                        let opponentId = that.players[socket.id].opponentId;
+                        let opponentId = self.players[socket.id].opponentId;
                         // emit a message to the opponent to remove this player
-                        that.outgoingHandler('disconnect', socket.id, opponentId);
+                        self.outgoingHandler('disconnect', socket.id, opponentId);
                         // remove this player from our players object
-                        delete that.players[socket.id];
-                        delete that.confidentialPlayers[socket.id];
+                        delete self.players[socket.id];
+                        delete self.confidentialPlayers[socket.id];
                     }
                 );
                 // when a player moves, update the player data
                 socket.on('playerMovement', 
                     function (movementData) {
-                        let player = that.players[socket.id];
+                        let player = self.players[socket.id];
                         let opponentId = player.opponentId;
 
                         player.spriteAngle = movementData.spriteAngle;
@@ -97,24 +97,62 @@ module.exports = class Net {
                         player.xVelocity = movementData.xVelocity;
                         player.yVelocity = movementData.yVelocity;
                         // emit a message to the other player about the player that moved
-                        that.outgoingHandler('playerMoved', player, opponentId);
+                        self.outgoingHandler('playerMoved', player, opponentId);
                     }
                 );
     
                 socket.on('scored', id => {
-                    let email = that.confidentialPlayers[id].playerEmail;
-                    that.application.User.findOneAndUpdate({email: email}, {$inc : {'wins' : 1}})
+                    let email = self.confidentialPlayers[id].playerEmail;
+                    self.application.User.findOneAndUpdate({email: email}, {$inc : {'wins' : 1}})
                     //immediately querying the field that we updated and sending the result to the client
                     //to make sure they will get the up to date result
                     .then( () => {
-                        that.application.getUsers({email: email}).then( users => {
-                            that.outgoingHandler('scored', users[0].wins, socket.id)
+                        self.application.getUsers({email: email}).then( users => {
+                            self.outgoingHandler('scored', users[0].wins, socket.id)
                         }).catch(err => {
                             throw err;
                         });
                     }).catch(err => {
                         throw err;
                     });
+                });
+
+                socket.on('playerShoot', () => {
+                    let player = self.players[socket.id];
+                    let direction = {
+                        x: null,
+                        y: null
+                    }
+                    switch (player.spriteAngle) {
+                        case 0:
+                            direction.x = 1;
+                            direction.y = 0;
+                            break;
+                        case 90:
+                            direction.x = 0;
+                            direction.y = 1;
+                            break;
+                        case 180:
+                            direction.x = -1;
+                            direction.y = 0;
+                            break;
+                        case 270:
+                            direction.x = 0;
+                            direction.y = -1;
+                            break;
+                        default:
+                            console.log("Error: " + player.name + " has a wrong spriteAngle!")
+                            break;
+                    }
+                    let bulletInfo = {
+                        x: player.x,
+                        y: player.y,
+                        xDir: direction.x,
+                        yDir: direction.y,
+                        owner: player
+                    };
+                    self.outgoingHandler('shoot', bulletInfo, player.opponentId);
+                    self.outgoingHandler('shoot', bulletInfo, socket.id);
                 });
                         
             }
@@ -133,8 +171,8 @@ module.exports = class Net {
 
             searcher.team = 'A';
             // searcher.x = 622;//debug
-            searcher.x = 128;
-            searcher.y = 60;
+            searcher.x = 128;//nodebug
+            searcher.y = 60;//nodebug
             searcher.spriteAngle = 0;
             opponent.team = 'B';
             opponent.x = 722;

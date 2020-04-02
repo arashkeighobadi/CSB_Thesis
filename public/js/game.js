@@ -51,6 +51,8 @@ class PreloadGame extends Phaser.Scene{
 		this.load.image('locator-2', 'assets/game/sprites/soldier/locator-2.png');
 		this.load.image('finish', 'assets/game/sprites/star_gold.png');
 		this.load.atlas('soldier', 'assets/game/sprites/soldier/soldier-move.png', 'assets/game/sprites/soldier/soldier-move.json');
+		this.load.image('bullet', 'assets/bomb-4x4.png', { frameWidth: 4, frameHeight: 4 });
+		
 		// this.load.image('ground', '/assets/platform.png');
 
 		this.load.image("terrain", "assets/game/maps/terrain_atlas512x.png");
@@ -72,17 +74,27 @@ class PlayGame extends Phaser.Scene{
 		this.messageBox = null;
 		this.baseACollectable = null;
 		this.baseBCollectable = null;
+		this.bullets = null;
+		// this.bulletList = {};
 		// to handle movement of everything which may move
 		this.movement = new MovementHandler(this);
 		// to handle collision of everything
 		this.collisionHandler = new CollisionHandler(this);
 		// to handle animation of everything
 		this.animation = new AnimationHandler(this);
+		// to handle keyboard events
+		this.actionHandler = new ActionHandler(this);
 		this.pause = false;
 
 
 	}
 	create() {
+		// this.graphics = this.add.graphics();
+		// this.graphics.clear();
+        // this.line = new Phaser.Geom.Line(300, 300, 400, 400);
+		// this.graphics.lineStyle(5, 0x00ff00);
+		// this.graphics.strokeLineShape(this.line);
+
 		// set background color of the camera
 		// this.cameras.main.setBackgroundColor('707070');
 		// this.grid = this.add.grid(400, 300, 800, 600, 16, 16, null, null, 0xffffff, 0.3);
@@ -109,6 +121,8 @@ class PlayGame extends Phaser.Scene{
 					this.messageBox.hideBox();
 					//we ask clientNet to listen to further messages coming from the server
 					this.clientNet.listenToServer();
+					//we ask actionHandler to listen for keyboard messages of player1
+					this.actionHandler.listenForAction();
 					//now, if this.pause is true, we set it to false so the handleMoveEvent can work				
 					if(this.pause){
 						this.pause = false;
@@ -129,12 +143,17 @@ class PlayGame extends Phaser.Scene{
 	/*===============================   Functions used in create()	===============================*/
 	loadGame = function() {
 
+        this.physics.world.on('worldbounds', this.actionHandler.onWorldBounds);
+
 		// Message box for communicating with the user
 		this.messageBox = null;
 		
 		//Groups in phaser are a way for us to manage similar game objects and control them as one unit. eg. for collision.
 		this.players = this.add.group();
 		this.physics.world.enableBody(this.players);
+		
+		this.bullets = this.add.group();
+		// this.physics.world.enableBody(this.bullets);
 		
 		this.animation.createAnimations();
 
@@ -145,7 +164,7 @@ class PlayGame extends Phaser.Scene{
 		// this.finishSprite = this.add.sprite(672, 550, 'finish'); //debugging purpose
 		// this.physics.world.enableBody(this.finishSprite);
 		// this.baseACollectable = new BaseCollectable(this, 672, 580, 'finish');//debug
-		this.baseACollectable = new BaseCollectable(this, 128, 50, 'finish');
+		this.baseACollectable = new BaseCollectable(this, 128, 50, 'finish');//nodebug
 		this.baseACollectable.enableBody();
 		this.baseACollectable.setOwnerTeam('A');
 		
@@ -162,6 +181,7 @@ class PlayGame extends Phaser.Scene{
 		this.collisionHandler.addOverlap(this.players, this.baseACollectable.bodySprite, this.baseACollectable.playerCollision);
 		this.collisionHandler.addOverlap(this.players, this.baseBCollectable.bodySprite, this.baseBCollectable.playerCollision);
 
+		this.collisionHandler.addCollider(this.players, this.bullets, this.collisionHandler.playerBulletCollision);
 
 		//making a tilemap
 		let map1 = this.make.tilemap({ key: "map1" }); /* , tileWidth: 40, tileHeight: 30 */
@@ -183,7 +203,9 @@ class PlayGame extends Phaser.Scene{
 		this.collisionHandler.addCollider(this.players, wallLayer);
 		// this.physics.add.collider(this.players, boundaryLayer);
 		this.collisionHandler.addCollider(this.players, boundaryLayer);
-		
+
+		this.collisionHandler.addCollider(this.bullets, wallLayer, this.collisionHandler.bulletMapWallCollision);
+		this.collisionHandler.addCollider(this.bullets, boundaryLayer, this.collisionHandler.bulletMapBoundCollision);
 		
 		/*
 			Using Phaser’s built-in keyboard manager
@@ -213,7 +235,8 @@ class PlayGame extends Phaser.Scene{
 					that.opponent.charContainer.body.setAllowGravity(false);
 				}
 			}
-		);				
+		);			
+			
 	}
 
 
@@ -221,27 +244,52 @@ class PlayGame extends Phaser.Scene{
 		// console.log("type of : " + typeof(this.players));
 			let id = charContainer.charID;
 			if (self.player1.charContainer.charID == id){
-				self.player1.scoreUp();
-				console.log("You won!");
-				self.messageBox = new MessageBox(self, "You Won!");
-				self.messageBox.addButton("PLAY AGAIN", () => {
-					self.pause = true;
-					self.messageBox.hideBox();
-					self.scene.restart();
-					console.log("clicked");
-				});
+				this.playerWon();
+				// self.player1.scoreUp();
+				// console.log("You won!");
+				// self.messageBox = new MessageBox(self, "You Won!");
+				// self.messageBox.addButton("PLAY AGAIN", () => {
+				// 	self.pause = true;
+				// 	self.messageBox.hideBox();
+				// 	self.scene.restart();
+				// 	console.log("clicked");
+				// });
 			} else {
+				this.playerLost();
 				// console.log(self.playersList[id].username + " won!");
-				let txt = self.opponent.name + " won!";
-				self.messageBox = new MessageBox(self, txt);
-				self.messageBox.addButton("PLAY AGAIN", () => {
-					self.pause = true;
-					self.messageBox.hideBox();
-					self.scene.restart();
-					console.log("clicked");
-				});
+			// 	let txt = self.opponent.name + " won!";
+			// 	self.messageBox = new MessageBox(self, txt);
+			// 	self.messageBox.addButton("PLAY AGAIN", () => {
+			// 		self.pause = true;
+			// 		self.messageBox.hideBox();
+			// 		self.scene.restart();
+			// 		console.log("clicked");
+			// 	});
 			}
 			self.finishSprite.destroy();		
+	}
+
+	playerWon(){
+		this.player1.scoreUp();
+		console.log("You won!");
+		this.messageBox = new MessageBox(this, "You Won!");
+		this.pause = true;
+		this.messageBox.addButton("PLAY AGAIN", () => {
+			this.messageBox.hideBox();
+			this.scene.restart();
+			console.log("clicked");
+		});
+	}
+
+	playerLost(){
+		let txt = this.opponent.name + " won!";
+		this.messageBox = new MessageBox(this, txt);
+		this.pause = true;
+		this.messageBox.addButton("PLAY AGAIN", () => {
+			this.messageBox.hideBox();
+			this.scene.restart();
+			console.log("clicked");
+		});	
 	}
 
 	/*===============================   Functions used in update()	===============================*/
@@ -313,5 +361,6 @@ import { ClientNet } from "./clientNet.js";
 import { CollisionHandler } from "./collisionHandler.js";
 //stands for base collectable. i.e. the collectable in the opponent's base
 import { BaseCollectable } from "./collectables/baseCollectable.js"; 
+import { ActionHandler } from "./actionHandler.js";
 
 
