@@ -49,6 +49,6 @@ export class BaseCollectable extends Collectable{
       }
 }
 
-import { MessageBox } from "../messageBox.js";
+import { MessageBox } from "../GUI/messageBox.js";
 
 

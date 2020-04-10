@@ -1,5 +1,5 @@
-import { MessageBox } from "./messageBox.js";
-import { Bullet } from "./explosives/bullet.js";
+import { MessageBox } from "../GUI/messageBox.js";
+import { Bullet } from "../explosives/bullet.js";
 
 export class ClientNet {
     

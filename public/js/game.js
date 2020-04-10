@@ -353,14 +353,14 @@ class PlayGame extends Phaser.Scene{
 	
 }
 
-import { MovementHandler } from "./movementHandler.js";
-import { Player } from "./player.js";
-import { AnimationHandler } from "./animationHandler.js";
-import { MessageBox } from "./messageBox.js";
-import { ClientNet } from "./clientNet.js";
-import { CollisionHandler } from "./collisionHandler.js";
+import { MovementHandler } from "./handlers/movementHandler.js";
+import { Player } from "./characters/player.js";
+import { AnimationHandler } from "./handlers/animationHandler.js";
+import { MessageBox } from "./GUI/messageBox.js";
+import { ClientNet } from "./handlers/clientNetHandler.js";
+import { CollisionHandler } from "./handlers/collisionHandler.js";
 //stands for base collectable. i.e. the collectable in the opponent's base
 import { BaseCollectable } from "./collectables/baseCollectable.js"; 
-import { ActionHandler } from "./actionHandler.js";
+import { ActionHandler } from "./handlers/actionHandler.js";
 
 
