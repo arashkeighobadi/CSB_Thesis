@@ -98,7 +98,24 @@
       </footer>
                   
         
-
+      <script>
+          /* 
+              handling space bar detection: 
+              For some reason, the input fields don't accept space character.
+              Here we add event listener to them and make them accept the space.
+          */
+          const textInputElements = document.getElementsByClassName("form-control");
+          Array.prototype.forEach.call(textInputElements, 
+            (element) => {
+              element.addEventListener("keydown", (e) => {
+                if(e.keyCode == 32) {
+                  let val = e.srcElement.value;
+                  e.srcElement.value = val + " ";
+                }
+              });
+            }
+          );
+      </script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     <script src="assets/console/js/main.js"></script>
