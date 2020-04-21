@@ -1,9 +1,10 @@
 //CharacterS is the server version of Character in the public folder
 class CharacterS {
-    constructor(charInfo) {
-        this.charID = charInfo.charID;
+    constructor(charID) {
+        this.charID = charID;
+        // Angle is determined in searchForMatch method
         this.spriteAngle = null;
-        this.x = charInfo.x;//null;
+        this.x = null;
         this.y = 580;
         this.xVelocity = 0;
         this.yVelocity = 0;

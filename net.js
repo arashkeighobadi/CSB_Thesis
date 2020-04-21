@@ -1,8 +1,12 @@
+//it's the counter part of the Player class in the front-end
+const PlayerS = require("./characters/playerS.js");
+
 module.exports = class Net {
     constructor(that) {
         this.application = that;
         //referenced the socket.io module and had it listen to our server object.
         this.io = require('socket.io').listen(that.server);
+
         //to keep track of all the players that are currently in the game.
         this.players = {};
         
@@ -28,6 +32,7 @@ module.exports = class Net {
     //this is called from app.js
     listen() {
         let self = this;
+        
         //added logic to listen for connections and disconnections.
         this.io.on('connection', 
             function (socket) {		
@@ -39,19 +44,7 @@ module.exports = class Net {
                 console.log('visitor number : ' + self.siteVisitorNumber);
                 
                 // create a new player and add it to our players object
-                self.players[socket.id] = {
-                    charID: socket.id,
-                    // Angle is determined in searchForMatch method
-                    spriteAngle: null,
-                    // the x value of the middle of the entrance is 672 so +/- 50 makes starting fair
-                    // x will be determined when they find a match. i.e. in searchForMatch method
-                    x: null,
-                    y: 550,
-                    xVelocity: 0,
-                    yVelocity: 0,
-                    // team will be determined when they find a match
-                    team: null 
-                };
+                self.players[socket.id] = new PlayerS(socket.id);
     
                 socket.on("searching", function (playerEmail) {
                     self.confidentialPlayers[socket.id] = {playerEmail: playerEmail};
