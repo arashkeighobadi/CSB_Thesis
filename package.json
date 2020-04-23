@@ -4,8 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "build": "browserify ./front-end/game.js > ./public/js/bundle.js",
+    "dev": "npm run build & nodemon app.js",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +25,11 @@
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.2",
+    "browserify": "^16.5.1",
+    "bufferutil": "^4.0.1",
+    "canvas": "^2.5.0",
+    "jest": "^25.4.0",
+    "utf-8-validate": "^5.0.2"
   }
 }

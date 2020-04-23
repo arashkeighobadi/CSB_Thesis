@@ -1,3 +1,4 @@
 node_modules/
 .VSCodeCounter
 config/keys.js
+public/plugins
