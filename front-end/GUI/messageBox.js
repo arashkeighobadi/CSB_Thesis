@@ -66,7 +66,3 @@ MessageBox.prototype.hideBox = function() {
     // this.msgBox.destroy();
     this.text1.destroy();
 }
-
-MessageBox.prototype.testing = function(){
-    return 3;
-}

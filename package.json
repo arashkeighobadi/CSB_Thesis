@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "build": "browserify ./front-end/game.js > ./public/js/bundle.js",
+    "build": "browserify ./front-end/playGame.js > ./public/js/bundle.js",
     "dev": "npm run build & nodemon app.js",
     "test": "jest"
   },

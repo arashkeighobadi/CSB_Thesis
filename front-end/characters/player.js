@@ -66,7 +66,7 @@ function Player(that, playerInfo) {//extends Character in character.js
     
 //Actual inheritance logic
 Player.prototype = Object.create(Character.prototype);
-Player.prototype.constructor = Character;
+Player.prototype.constructor = Player;
 
 Player.prototype.scoreUp = function() {
     this.playGameScene.socket.emit('scored', this.charContainer.charID);

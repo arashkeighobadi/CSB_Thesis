@@ -12,9 +12,4 @@ const Character = function(that, charInfo) {
     this.charContainer.body.setCollideWorldBounds(true);
 }
 
-Character.prototype.testing = function(){
-    console.log("called");
-    return 3;
-}
-
 module.exports = Character;
