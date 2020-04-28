@@ -8,8 +8,7 @@ const CollisionHandler = require("./handlers/collisionHandler.js");
 const BaseCollectable = require("./collectables/baseCollectable.js"); 
 const ActionHandler = require("./handlers/actionHandler.js");
 const PreloadGame = require("./preloadGame.js");
-const Phaser = require("../public/plugins/phaser/dist/phaser.js");
-
+const Phaser = require("phaser");
 
 let game;
 window.onload = function() {

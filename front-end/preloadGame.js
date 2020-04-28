@@ -1,4 +1,4 @@
-const Phaser = require("../public/plugins/phaser/dist/phaser.js");
+const Phaser = require("phaser");
 
 function PreloadGame(){
 	Phaser.Scene.call(this,"PreloadGame");
