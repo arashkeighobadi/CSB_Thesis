@@ -5,7 +5,7 @@
   "main": "startApplication.js",
   "scripts": {
     "build": "browserify ./front-end/playGame.js > ./public/js/bundle.js",
-    "dev": "npm run build & nodemon startApplication.js",
+    "dev": "npm run build & node startApplication.js",
     "test": "jest",
     "all": "npm run test & npm run build & nodemon startApplication.js"
   },

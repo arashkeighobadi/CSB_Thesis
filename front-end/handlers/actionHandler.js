@@ -14,7 +14,11 @@ ActionHandler.prototype.listenForAction = function() {
     that.input.keyboard.on('keydown-SPACE', 
         function (event) {
             if (self1.spaceKeyReleased) {
-                that.clientNet.emit('playerShoot');	
+                let gunZonePosition = { 
+                    x: that.player1.getGunZoneAbsX(), 
+                    y: that.player1.getGunZoneAbsY()
+                };
+                that.clientNet.emit('playerShoot', gunZonePosition);	
             }
         }
         );

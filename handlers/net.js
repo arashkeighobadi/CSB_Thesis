@@ -109,7 +109,7 @@ Net.prototype.listen = function() {
                 });
             });
 
-            socket.on('playerShoot', () => {
+            socket.on('playerShoot', (gunZonePosition) => {
                 let player = self.players[socket.id];
                 let direction = {
                     x: null,
@@ -137,8 +137,8 @@ Net.prototype.listen = function() {
                         break;
                 }
                 let bulletInfo = {
-                    x: player.x,
-                    y: player.y,
+                    x: gunZonePosition.x,
+                    y: gunZonePosition.y,
                     xDir: direction.x,
                     yDir: direction.y,
                     owner: player,

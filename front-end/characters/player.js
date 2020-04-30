@@ -40,6 +40,10 @@ function Player(that, playerInfo) {//extends Character in character.js
     else {
         console.log("wrong group name! for player ID " + playerInfo.charID);
     }
+
+    //gun zone
+    this.gunZone = that.add.zone(5, 5, 5, 5);
+    that.physics.world.enable(this.gunZone);
     
     //Animation
     that.animation.play('soldier-move', this.bodySprite);
@@ -59,6 +63,8 @@ function Player(that, playerInfo) {//extends Character in character.js
     this.charContainer.add([this.locator]);
     this.charContainer.add([this.locatorBoundary]);
     this.charContainer.add([this.bodySprite]);
+    this.charContainer.add([this.gunZone]);
+
 
     that.players.add(this.charContainer);
 
@@ -78,6 +84,7 @@ Player.prototype.scoreUp = function() {
     });
 }
 
+
 Player.prototype.get_xVelocity = function() {
     return this.charContainer.body.velocity.x;
 }
@@ -92,4 +99,16 @@ Player.prototype.getX = function() {
 
 Player.prototype.getY = function() {
     return this.charContainer.y;
+}
+
+Player.prototype.getGunZoneAbsX = function() {
+    //note: when you use body.x you get the x value reletive to the world otherwise, 
+    //      gunZone.x gives relative to the container
+    return (this.gunZone.body.x + this.gunZone.width/2);
+}
+
+Player.prototype.getGunZoneAbsY = function() {
+    //note: when you use body.y you get the x value reletive to the world otherwise, 
+    //      gunZone.y gives relative to the container
+    return (this.gunZone.body.y + this.gunZone.height/2);
 }
