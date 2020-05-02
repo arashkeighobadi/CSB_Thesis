@@ -18,10 +18,10 @@ function Player(that, playerInfo) {//extends Character in character.js
     
     //Score
     this.score = playerInfo.score;
-    if (this.playGameScene.socket.id == playerInfo.charID){
-        this.scoreText = this.playGameScene.add.text(584, 16, '', { fontSize: '32px', fill: '#FFFFFF' });
-        this.scoreText.setText('wins: ' + this.score);
-    }
+    // if (this.playGameScene.socket.id == playerInfo.charID){
+    //     this.scoreText = this.playGameScene.add.text(584, 16, '', { fontSize: '14px', fill: '#FFFFFF' });
+    //     this.scoreText.setText(this.name + "'s wins: " + this.score);
+    // }
 
     //locator
     this.locator = that.add.sprite(0, 0, 'locator').setAlpha(0.5);
@@ -74,14 +74,8 @@ function Player(that, playerInfo) {//extends Character in character.js
 Player.prototype = Object.create(Character.prototype);
 Player.prototype.constructor = Player;
 
-Player.prototype.scoreUp = function() {
-    this.playGameScene.socket.emit('scored', this.charContainer.charID);
-    this.playGameScene.socket.on('scored', score => {
-        //increase score
-        console.log("I fucking scoreddddd!!!!");
-        this.score = score;
-        this.scoreText.setText('wins: ' + score);
-    });
+Player.prototype.scoreUp = function(score) {
+    this.score = score;
 }
 
 

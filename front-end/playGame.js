@@ -223,13 +223,35 @@ PlayGame.prototype.loadPlayers = function(players){
 			if (players[id].charID === that.socket.id) {
 				//passes it the current player’s information, and a reference to the current scene.
 				that.player1 = new Player(that, players[id]);
+					
 			} else {//if players[id] is not the current player.			
 				that.opponent = new Player(that, players[id]);
-				that.opponent.charContainer.body.setAllowGravity(false);
+				that.opponent.charContainer.body.setAllowGravity(false);	
 			}
 		}
-	);			
-		
+	);
+
+	this.loadScores();
+}
+
+PlayGame.prototype.loadScores = function(){
+	this.player1ScoreTxt = this.add.text(584, 16, '', { fontSize: '14px', fill: '#FFFFFF' });
+	this.player1ScoreTxt.setText(this.player1.name + "'s wins: " + this.player1.score);
+
+	this.opponentScoreTxt = this.add.text(584, 32, '', { fontSize: '14px', fill: '#FFFFFF' });
+	this.opponentScoreTxt.setText(this.opponent.name + "'s wins: " + this.opponent.score);
+}
+
+PlayGame.prototype.showNewScore = function(player){
+	if (player.charID == this.player1.charID){
+		this.player1ScoreTxt.setText(this.player1.name + "'s wins: " + this.player1.score);
+	} 
+	else if (player.charID == this.opponent.charID){
+		this.opponentScoreTxt.setText(this.opponent.name + "'s wins: " + this.opponent.score);
+	}
+	else{
+		console.log("ERROR: Problem in showNewScore method!")
+	}
 }
 
 
@@ -263,18 +285,12 @@ PlayGame.prototype.playerCollidesTarget = function(self, charContainer, finishSp
 }
 
 PlayGame.prototype.playerWon = function(){
-	this.player1.scoreUp();
-	console.log("You won!");
-	this.messageBox = new MessageBox(this, "You Won!");
 	this.pause = true;
-	this.messageBox.addButton("PLAY AGAIN", () => {
-		this.messageBox.hideBox();
-		this.scene.restart();
-		console.log("clicked");
-	});
+	this.clientNet.emit('scored', this.player1.charID);
 }
 
 PlayGame.prototype.playerLost = function(){
+	this.pause = true;
 	let txt = this.opponent.name + " won!";
 	this.messageBox = new MessageBox(this, txt);
 	this.pause = true;

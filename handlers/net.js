@@ -95,12 +95,14 @@ Net.prototype.listen = function() {
 
             socket.on('scored', id => {
                 let email = self.confidentialPlayers[id].playerEmail;
+                let player = self.players[socket.id];
                 self.application.User.findOneAndUpdate({email: email}, {$inc : {'wins' : 1}})
                 //immediately querying the field that we updated and sending the result to the client
                 //to make sure they will get the up to date result
                 .then( () => {
                     self.application.getUsers({email: email}).then( users => {
-                        self.outgoingHandler('scored', users[0].wins, socket.id)
+                        self.outgoingHandler('scored', users[0].wins, socket.id);
+                        self.outgoingHandler('opponentScored', users[0].wins, player.opponentId);
                     }).catch(err => {
                         throw err;
                     });
