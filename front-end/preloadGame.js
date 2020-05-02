@@ -26,6 +26,8 @@ PreloadGame.prototype.preload = function(){
 
 	//GUI
 	this.load.image("window_small", "assets/game/GUI/ui_dark_blue_racing/window_small.png");
+	this.load.image("health_bar", "assets/game/GUI/health/health_bar.png");
+	this.load.image("health_point", "assets/game/GUI/health/health_point.png");
 
 }
 PreloadGame.prototype.create = function(){

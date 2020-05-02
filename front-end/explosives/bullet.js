@@ -7,7 +7,9 @@ function Bullet(that, x, y, name, owner){ // Extends Explosive
     this.bodySprite.setSize(4,4);
     this.owner = owner;
     this.bodySprite.owner = owner;
+    this.bodySprite.bullet = this;
     this.speed = 500;
+    this.damage = 1;
     that.bullets.add(this.bodySprite);
     // this.index = this.playGameScene.bulletList.length;
     // that.bulletList[this.index] = this;
