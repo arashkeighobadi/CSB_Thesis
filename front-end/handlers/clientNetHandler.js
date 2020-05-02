@@ -43,6 +43,27 @@ ClientNet.prototype.listenToServer = function (){
         bullet.bodySprite.setAngle(bulletInfo.spriteAngle);
         bullet.setVelocity(bulletInfo.xDir * bullet.speed, bulletInfo.yDir * bullet.speed);
     });
+
+    that.socket.on('scored', score => {
+        //increase score
+        that.player1.scoreUp(score);
+        that.showNewScore(that.player1);
+        console.log("You won!");
+        that.messageBox = new MessageBox(that, "You Won!");
+        // that.pause = true;
+        that.messageBox.addButton("PLAY AGAIN", () => {
+            that.messageBox.hideBox();
+            that.scene.restart();
+            console.log("clicked");
+        });
+    });
+
+    // NOTE: opponentScored and scored should be merged
+    that.socket.on('opponentScored', score => {
+        //increase score
+        that.opponent.scoreUp(score);
+        that.showNewScore(that.opponent);
+    });
 }
 
 

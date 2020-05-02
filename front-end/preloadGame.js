@@ -23,6 +23,12 @@ PreloadGame.prototype.preload = function(){
 	this.load.image("terrain", "assets/game/maps/terrain_atlas512x.png");
 	this.load.tilemapTiledJSON("map1", "assets/game/maps/map2-uncompressed-40x30-16px.json");
 	// this.load.tilemapCSV("map1", "assets/game/maps/map1-40x30._wall.csv");
+
+	//GUI
+	this.load.image("window_small", "assets/game/GUI/ui_dark_blue_racing/window_small.png");
+	this.load.image("health_bar", "assets/game/GUI/health/health_bar.png");
+	this.load.image("health_point", "assets/game/GUI/health/health_point.png");
+
 }
 PreloadGame.prototype.create = function(){
 	this.scene.start("PlayGame");
