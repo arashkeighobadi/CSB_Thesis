@@ -23,30 +23,24 @@ CollisionHandler.prototype.addOverlap = function(obj1, obj2, callback) {
     });
 }
 
-CollisionHandler.prototype.playerBulletCollision = function(that, player, bullet){
+CollisionHandler.prototype.playerBulletCollision = function(that, playerCharContainer, bulletBodySprite){
+    let player = playerCharContainer.player;
+    let bullet = bulletBodySprite.bullet;
+
     if(player.charID != bullet.owner.charID ){
-        bullet.destroy();
-        player.destroy();
-        if(player.charID != that.player1.charID){
-            that.playerWon();
+        bulletBodySprite.destroy();
+        player.decreaseHealth(bullet.damage);
+        that.removeHealthPoints(player, bullet.damage);
+        if(player.health <= 0){
+            console.log("player's health <= 0: " + player.health);
+            playerCharContainer.destroy();
+            if(player.charID != that.player1.charID){
+                that.playerWon();
+            }
+            else {
+                that.playerLost();
+            }
         }
-        else {
-            that.playerLost();
-        }
-        // that.players.getChildren().forEach(
-        //     function(p) {
-        //         console.log("debug");
-        //         console.log(player.charID);
-        //         console.log(p.charID);
-        //         if (player.charID === p.charID) {
-        //             that.playerLost();
-        //             //to remove that game object from the game
-        //         }
-        //         else {
-        //             that.playerWon();
-        //         }
-        //     }
-        // );
     }
 }
 

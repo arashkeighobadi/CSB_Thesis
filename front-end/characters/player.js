@@ -14,7 +14,8 @@ function Player(that, playerInfo) {//extends Character in character.js
     // this.lookingDirection = that.movement.lookingDirections.NONE;
     // this.bodySprite;//
     this.bodySprite = that.add.sprite(0, 0/* container/2 - bodySprite/2 */, 'soldier').setScale(0.4);//.setOrigin(0.5); //0.5 means middle of the sprite
-    // this.charContainer;//
+    
+    this.charContainer.player = this;
     
     //Score
     this.score = playerInfo.score;

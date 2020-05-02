@@ -174,7 +174,7 @@ PlayGame.prototype.loadGame = function() {
 	this.collisionHandler.addOverlap(this.players, this.baseACollectable.bodySprite, this.baseACollectable.playerCollision);
 	this.collisionHandler.addOverlap(this.players, this.baseBCollectable.bodySprite, this.baseBCollectable.playerCollision);
 
-	this.collisionHandler.addCollider(this.players, this.bullets, this.collisionHandler.playerBulletCollision);
+	this.collisionHandler.addOverlap(this.players, this.bullets, this.collisionHandler.playerBulletCollision);
 
 	//making a tilemap
 	let map1 = this.make.tilemap({ key: "map1" }); /* , tileWidth: 40, tileHeight: 30 */
@@ -232,13 +232,17 @@ PlayGame.prototype.loadPlayers = function(players){
 	);
 
 	this.loadScores();
+	this.loadPlayersHealthBars();
 }
 
+//a player should have a scoreBar as a field. The score related functions should go to a new class called ScoreBar
 PlayGame.prototype.loadScores = function(){
 	this.player1ScoreTxt = this.add.text(584, 16, '', { fontSize: '14px', fill: '#FFFFFF' });
+	this.player1ScoreTxt.setOrigin(0,0.5);
 	this.player1ScoreTxt.setText(this.player1.name + "'s wins: " + this.player1.score);
 
 	this.opponentScoreTxt = this.add.text(584, 32, '', { fontSize: '14px', fill: '#FFFFFF' });
+	this.opponentScoreTxt.setOrigin(0,0.5);
 	this.opponentScoreTxt.setText(this.opponent.name + "'s wins: " + this.opponent.score);
 }
 
@@ -253,6 +257,51 @@ PlayGame.prototype.showNewScore = function(player){
 		console.log("ERROR: Problem in showNewScore method!")
 	}
 }
+
+//a player should have a healthBar as a field. The score related functions should go to a new class called HealthBar
+PlayGame.prototype.loadPlayersHealthBars = function() {
+	this.player1HealthBar = this.add.image(500, 16, "health_bar");
+	this.player1HealthBar.setOrigin(0,0.5);
+	this.player1HealthBar.displayHeight  = 14;
+	this.opponentHealthBar = this.add.image(500, 32, "health_bar");
+	this.opponentHealthBar.setOrigin(0,0.5);
+	this.opponentHealthBar.displayHeight  = 14;
+
+	this.player1HealthPoints = [];
+	this.opponentHealthPoints = [];
+	let healthPointPosX = 516;
+	if(this.player1.health != this.opponent.health){
+		console.log("Error: It seems the players have different initial healths! " +
+		"the health point loader loop inside the loadPlayersHealthBars method:)");
+	}
+	for(let i = 0; i < this.player1.health; i++){
+		let hpPlayer1 = this.add.image(healthPointPosX, 16, "health_point");
+		hpPlayer1.setOrigin(0,0.5);
+		hpPlayer1.displayHeight  = 7.5;
+		let hpOpponent = this.add.image(healthPointPosX, 32, "health_point");
+		hpOpponent.setOrigin(0,0.5);
+		hpOpponent.displayHeight  = 7.5;
+		
+		this.player1HealthPoints.unshift(hpPlayer1);
+		this.opponentHealthPoints.unshift(hpOpponent);
+		healthPointPosX += 6;
+	}
+}
+
+PlayGame.prototype.removeHealthPoints = function(player, number){
+	let healthPoints;
+	if(player.charID == this.player1.charID){
+		healthPoints = this.player1HealthPoints;
+	}
+	else {
+		healthPoints = this.opponentHealthPoints;
+	}
+
+	for(let i = 0; i < number; i++){
+		healthPoints.shift().destroy();
+	}
+}
+
 
 
 PlayGame.prototype.playerCollidesTarget = function(self, charContainer, finishSprite) {
