@@ -3,6 +3,7 @@ module.exports = BaseCollectable;
 const Collectable = require('./collectable.js');
 const MessageBox = require('../GUI/messageBox.js');
 
+
 //stands for base collectable. i.e. the collectable in the opponent's base
 function BaseCollectable(that, x, y, name){ // Extends Collectibe
     Collectable.call(this, that, x, y, name);
