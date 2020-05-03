@@ -6,17 +6,6 @@ function Net(that){
     //referenced the socket.io module and had it listen to our server object.
     this.io = require('socket.io').listen(that.server);
 
-    //to keep track of all the players that are currently in the game.
-    this.players = {};
-    
-    //array of players who are waiting for an opponent. First one has waited the longest.
-    this.waiting = [];
-    
-    //confidential list of all players where we store emails and ID's
-    //!!! DO NOT SEND IT TO THE CLIENTS !!!
-    this.confidentialPlayers = {};
-    
-
     //each group contains two players. the first player's id will be the index of the group.
     // this.groups = {};
 
@@ -31,6 +20,7 @@ Net.prototype.outgoingHandler = function(msg, obj, charID) {
 //this is called from app.js
 Net.prototype.listen = function() {
     let self = this;
+    let application = this.application;
     
     //added logic to listen for connections and disconnections.
     this.io.on('connection', 
@@ -43,22 +33,22 @@ Net.prototype.listen = function() {
             console.log('visitor number : ' + self.siteVisitorNumber);
             
             // create a new player and add it to our players object
-            self.players[socket.id] = new PlayerS(socket.id);
+            application.players[socket.id] = new PlayerS(socket.id);
 
             socket.on("searching", function (playerEmail) {
-                self.confidentialPlayers[socket.id] = {playerEmail: playerEmail};
+                application.confidentialPlayers[socket.id] = {playerEmail: playerEmail};
                 //accessing DB and getting the name of the player who just got connected, using their email
-                self.application.getUsers({ email: playerEmail}).then( users => {
+                application.getUsers({ email: playerEmail}).then( users => {
                     users.forEach(user => {
-                        self.players[socket.id].name = user.name;
-                        self.players[socket.id].score = user.wins;
+                        application.players[socket.id].name = user.name;
+                        application.players[socket.id].score = user.wins;
                         console.log("score : " + user.wins);
                     });
                     console.log("here : " + playerEmail); //debug
                     
                     //the following call are inside then because they need to wait for the 
                     //query result and then be executed
-                    self.waiting.unshift(self.players[socket.id]);
+                    application.waiting.unshift(application.players[socket.id]);
                     self.searchForMatch(socket);
                 }).catch (err => {
                     throw err;
@@ -69,18 +59,18 @@ Net.prototype.listen = function() {
             socket.on('disconnect', 
                 function () {
                     console.log('user disconnected');
-                    let opponentId = self.players[socket.id].opponentId;
+                    let opponentId = application.players[socket.id].opponentId;
                     // emit a message to the opponent to remove this player
                     self.outgoingHandler('disconnect', socket.id, opponentId);
                     // remove this player from our players object
-                    delete self.players[socket.id];
-                    delete self.confidentialPlayers[socket.id];
+                    delete application.players[socket.id];
+                    delete application.confidentialPlayers[socket.id];
                 }
             );
             // when a player moves, update the player data
             socket.on('playerMovement', 
                 function (movementData) {
-                    let player = self.players[socket.id];
+                    let player = application.players[socket.id];
                     let opponentId = player.opponentId;
 
                     player.spriteAngle = movementData.spriteAngle;
@@ -94,13 +84,13 @@ Net.prototype.listen = function() {
             );
 
             socket.on('scored', id => {
-                let email = self.confidentialPlayers[id].playerEmail;
-                let player = self.players[socket.id];
-                self.application.User.findOneAndUpdate({email: email}, {$inc : {'wins' : 1}})
+                let email = application.confidentialPlayers[id].playerEmail;
+                let player = application.players[socket.id];
+                application.User.findOneAndUpdate({email: email}, {$inc : {'wins' : 1}})
                 //immediately querying the field that we updated and sending the result to the client
                 //to make sure they will get the up to date result
                 .then( () => {
-                    self.application.getUsers({email: email}).then( users => {
+                    application.getUsers({email: email}).then( users => {
                         self.outgoingHandler('scored', users[0].wins, socket.id);
                         self.outgoingHandler('opponentScored', users[0].wins, player.opponentId);
                     }).catch(err => {
@@ -112,7 +102,7 @@ Net.prototype.listen = function() {
             });
 
             socket.on('playerShoot', (gunZonePosition) => {
-                let player = self.players[socket.id];
+                let player = application.players[socket.id];
                 let direction = {
                     x: null,
                     y: null
@@ -157,11 +147,13 @@ Net.prototype.listen = function() {
 }
 
 Net.prototype.searchForMatch = function(socket) {
-    console.log("waiting list length : " + this.waiting.length);
-    if(this.waiting.length > 1){
+    let application = this.application;
+
+    console.log("waiting list length : " + application.waiting.length);
+    if(application.waiting.length > 1){
         console.log("searchingggggg for match");
-        let opponent = this.waiting.pop();
-        let searcher = this.waiting.shift();
+        let opponent = application.waiting.pop();
+        let searcher = application.waiting.shift();
         let players = {searcher, opponent};
 
         searcher.team = 'A';
@@ -179,7 +171,7 @@ Net.prototype.searchForMatch = function(socket) {
         this.outgoingHandler('matched', players, searcher.charID);
     }
     else {
-        this.players[socket.id].opponentId = null;
+        this.application.players[socket.id].opponentId = null;
     }
     // send the players object to the new player (to this particular socket)
     // update all other players about the new player (to all other sockets)
