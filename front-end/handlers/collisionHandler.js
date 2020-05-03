@@ -29,6 +29,7 @@ CollisionHandler.prototype.playerBulletCollision = function(that, playerCharCont
 
     if(player.charID != bullet.owner.charID ){
         bulletBodySprite.destroy();
+        that.sound.play('player_got_shot');
         player.decreaseHealth(bullet.damage);
         that.removeHealthPoints(player, bullet.damage);
         if(player.health <= 0){

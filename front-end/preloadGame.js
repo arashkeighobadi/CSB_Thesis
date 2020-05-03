@@ -29,6 +29,13 @@ PreloadGame.prototype.preload = function(){
 	this.load.image("health_bar", "assets/game/GUI/health/health_bar.png");
 	this.load.image("health_point", "assets/game/GUI/health/health_point.png");
 
+	//audio
+	this.load.audio("gun_shoot", "assets/game/audio/gun-5.ogg");
+	this.load.audio("player_got_shot", "assets/game/audio/scream-5.ogg");
+
+	//music
+	this.load.audio("bg_music", "assets/game/music/theme-4.ogg");
+
 }
 PreloadGame.prototype.create = function(){
 	this.scene.start("PlayGame");

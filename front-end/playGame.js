@@ -35,6 +35,10 @@ window.onload = function() {
 		mode: Phaser.Scale.FIT,
 		autoCenter: Phaser.Scale.CENTER_BOTH,
 
+		audio: {
+			disableWebAudio: true
+		},
+
 		//we enabled the arcade physics that is available in Phaser, and we set the gravity to 0.
 		physics: {
 			default: 'arcade',
@@ -74,6 +78,7 @@ function PlayGame(){
 	this.animation = new AnimationHandler(this);
 	// to handle keyboard events
 	this.actionHandler = new ActionHandler(this);
+
 	this.pause = false;
 }
 
@@ -82,6 +87,24 @@ PlayGame.prototype = Object.create(Phaser.Scene.prototype);
 PlayGame.prototype.constructor = PlayGame;
 
 PlayGame.prototype.create = function() {
+
+	//music
+	let musicConfig = {
+		mute: false,
+		volume: 1,
+		rate: 1,
+		detune: 0,
+		seek: 0,
+		loop: false,
+		delay: 0
+	}
+	this.music = this.sound.add('bg_music', musicConfig);
+	this.music.play(musicConfig);
+
+	//audio
+	this.sound.add('gun_shoot');
+	this.sound.add('player_got_shot');
+
 	// this.graphics = this.add.graphics();
 	// this.graphics.clear();
 	// this.line = new Phaser.Geom.Line(300, 300, 400, 400);
