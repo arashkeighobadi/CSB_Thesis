@@ -7,6 +7,16 @@ function Application(){
     const passport = require('passport');
         
     const app = express();
+
+    //to keep track of all the players that are currently in the game.
+    this.players = {};
+    
+    //array of players who are waiting for an opponent. First one has waited the longest.
+    this.waiting = [];
+    
+    //confidential list of all players where we store emails and ID's
+    //!!! DO NOT SEND IT TO THE CLIENTS !!!
+    this.confidentialPlayers = {};
     
     //DB users model
     this.User = require('./models/User');
