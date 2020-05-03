@@ -26,8 +26,17 @@ PreloadGame.prototype.preload = function(){
 
 	//GUI
 	this.load.image("window_small", "assets/game/GUI/ui_dark_blue_racing/window_small.png");
+	this.load.image("unchecked_box", "assets/game/GUI/ui_dark_blue_racing/checkbox.png");
+	this.load.image("checked_box", "assets/game/GUI/ui_dark_blue_racing/checkbox_select.png");
 	this.load.image("health_bar", "assets/game/GUI/health/health_bar.png");
 	this.load.image("health_point", "assets/game/GUI/health/health_point.png");
+
+	//audio
+	this.load.audio("gun_shoot", "assets/game/audio/gun-5.ogg");
+	this.load.audio("player_got_shot", "assets/game/audio/scream-5.ogg");
+
+	//music
+	this.load.audio("bg_music", "assets/game/music/theme-4.ogg");
 
 }
 PreloadGame.prototype.create = function(){
