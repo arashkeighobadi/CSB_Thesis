@@ -2,6 +2,7 @@ const MovementHandler = require("./handlers/movementHandler.js");
 const Player = require("./characters/player.js");
 const AnimationHandler = require("./handlers/animationHandler.js");
 const MessageBox = require("./GUI/messageBox.js");
+const Checkbox = require("./GUI/checkbox.js");
 const ClientNet = require("./handlers/clientNetHandler.js");
 const CollisionHandler = require("./handlers/collisionHandler.js");
 //stands for base collectable. i.e. the collectable in the opponent's base
@@ -69,6 +70,7 @@ function PlayGame(){
 	this.baseACollectable = null;
 	this.baseBCollectable = null;
 	this.bullets = null;
+	this.soundMuted = false;
 	// this.bulletList = {};
 	// to handle movement of everything which may move
 	this.movement = new MovementHandler(this);
@@ -95,15 +97,46 @@ PlayGame.prototype.create = function() {
 		rate: 1,
 		detune: 0,
 		seek: 0,
-		loop: false,
+		loop: true,
 		delay: 0
 	}
 	this.music = this.sound.add('bg_music', musicConfig);
-	this.music.play(musicConfig);
 
 	//audio
 	this.sound.add('gun_shoot');
 	this.sound.add('player_got_shot');
+
+	// sound and music control
+	// this.soundCheckbox = new Checkbox(this, 'Sound', 300, 580);
+	this.musicCheckbox = new Checkbox(this, 'music', 10, 580, () =>{
+		if(this.musicCheckbox.isChecked){
+			if(this.music.audio){
+				this.music.stop();
+			}
+			this.musicCheckbox.uncheck();
+		}
+		else if(!this.musicCheckbox.isChecked){
+			this.music.play();
+			this.musicCheckbox.check();
+		}
+		else{
+			console.log("ERROR: Something's not okay with musicCheckbox callback function!");
+		}
+	});
+	
+	this.soundCheckbox = new Checkbox(this, 'sound', 100, 580, () =>{
+		if(this.soundCheckbox.isChecked){
+			this.soundMuted = true;
+			this.soundCheckbox.uncheck();
+		}
+		else if(!this.soundCheckbox.isChecked){
+			this.soundMuted = false;
+			this.soundCheckbox.check();
+		}
+		else{
+			console.log("ERROR: Something's not okay with musicCheckbox callback function!");
+		}
+	});
 
 	// this.graphics = this.add.graphics();
 	// this.graphics.clear();
@@ -122,6 +155,9 @@ PlayGame.prototype.create = function() {
 
 		//if the user clicks on yes, the callback function is fired
 		this.messageBox.addButton("YES", () => {
+			if(this.musicCheckbox.isChecked){
+				this.music.play();
+			}
 			this.messageBox.text1.setText("Searching...");
 			//make the yes button disabled. Otherwise it can be pressed again.
 			this.input.disable(this.messageBox.button);

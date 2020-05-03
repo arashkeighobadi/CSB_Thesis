@@ -42,7 +42,9 @@ ClientNet.prototype.listenToServer = function (){
         let bullet = new Bullet(that, bulletInfo.x, bulletInfo.y, 'bullet', bulletInfo.owner);
         bullet.bodySprite.setAngle(bulletInfo.spriteAngle);
         bullet.setVelocity(bulletInfo.xDir * bullet.speed, bulletInfo.yDir * bullet.speed);
-        that.sound.play('gun_shoot');
+        if(!that.soundMuted){
+            that.sound.play('gun_shoot');
+        }
     });
 
     that.socket.on('scored', score => {
