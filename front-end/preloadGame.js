@@ -28,8 +28,8 @@ PreloadGame.prototype.preload = function(){
 	this.load.image("window_small", "assets/game/GUI/ui_dark_blue_racing/window_small.png");
 	this.load.image("unchecked_box", "assets/game/GUI/ui_dark_blue_racing/checkbox.png");
 	this.load.image("checked_box", "assets/game/GUI/ui_dark_blue_racing/checkbox_select.png");
-	this.load.image("health_bar", "assets/game/GUI/health/health_bar.png");
-	this.load.image("health_point", "assets/game/GUI/health/health_point.png");
+	this.load.image("bar", "assets/game/GUI/bar/bar.png");
+	this.load.image("point", "assets/game/GUI/bar/point.png");
 
 	//audio
 	this.load.audio("gun_shoot", "assets/game/audio/gun-5.ogg");
